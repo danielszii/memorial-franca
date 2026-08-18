@@ -279,7 +279,9 @@ export default function App() {
           <div style={{ flex: 1, background: '#ffffff' }} />
           <div style={{ flex: 1, background: '#ED2939' }} />
         </div>
-        <div
+
+        {/* QUADRICULADO DO BANNER */}
+        {/* <div
           style={{
             position: 'absolute',
             inset: 0,
@@ -290,7 +292,7 @@ export default function App() {
             `,
             backgroundSize: '48px 48px',
           }}
-        />
+        /> */}
 
         <div className="relative max-w-screen-xl mx-auto px-10 w-full" style={{ paddingTop: 120, paddingBottom: 100 }}>
           <div style={{ maxWidth: 720 }}>
