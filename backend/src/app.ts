@@ -16,7 +16,8 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://seu-dominio-memorial.vercel.app', // Sua URL final do front
+      'https://memorialfranca.com.br',
+      'https://www.memorialfranca.com.br',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   })

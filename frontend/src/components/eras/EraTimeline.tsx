@@ -164,7 +164,7 @@ export function EraTimeline({ eras, activeEra, setActiveEra }: EraTimelineProps)
                   }}
                 >
                   <span style={{ opacity: 0.5, fontSize: 9, letterSpacing: '0.1em', marginRight: 5 }}>
-                    SUB
+                    GER
                   </span>
                   {s}
                 </span>
