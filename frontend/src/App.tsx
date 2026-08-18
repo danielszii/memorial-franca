@@ -26,10 +26,11 @@ export default function App() {
 
   useEffect(() => {
     async function fetchData() {
+      const API_URL = 'https://memorial-franca.onrender.com'
       try {
         const [resEras, resMembers] = await Promise.all([
-  axios.get('http://localhost:3001/franca/eras'),
-  axios.get('http://localhost:3001/franca/members'),
+        axios.get(`${API_URL}/franca/eras`),
+        axios.get(`${API_URL}/franca/members`),
 ])
         setEras(resEras.data)
         setMembers(resMembers.data)
