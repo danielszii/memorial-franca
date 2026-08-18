@@ -1,0 +1,19 @@
+# Dependências
+**/node_modules
+node_modules/
+
+# Builds / Compilação
+**/dist
+**/build
+dist/
+build/
+
+# Variáveis de ambiente locais
+**/.env
+**/.env.local
+.env
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
+.vscode/
