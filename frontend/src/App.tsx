@@ -46,6 +46,12 @@ export default function App() {
     fetchData()
   }, [])
 
+  useEffect(() => {
+  if (window.location.hash) {
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+}, []);
+
   const era = eras.find(e => e.version === activeEra) || eras[0]
 
   const filtered = members.filter(m => {
