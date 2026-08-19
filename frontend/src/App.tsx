@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import logoFra from "./imports/Logo FRA x K.png";
-import heroBg from "./imports/Banner KROOZZNS.png";
+import heroBg1 from "./imports/Banner KROOZZNS.png";
+import heroBg2 from "./imports/Banner CORINGADAS.png";
 import { Era, Member, Rank } from './types/memorial'
 import { navLinks } from './constants/theme'
 import { scrollTo } from './utils/scroll'
@@ -10,6 +11,11 @@ import { MemberModal } from './components/members/MemberModal'
 import { EraTimeline } from './components/eras/EraTimeline'
 import { HonorsSection } from './components/layout/HonorsSection'
 import { GallerySection } from './components/layout/GallerySection'
+
+const HERO_IMAGES = [
+  heroBg1,
+  heroBg2,
+];
 
 export default function App() {
   const [eras, setEras] = useState<Era[]>([])
@@ -23,6 +29,10 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const PAGE_SIZE = 20
+  const [selectedBg] = useState(() => {
+    const randomIndex = Math.floor(Math.random() * HERO_IMAGES.length);
+    return HERO_IMAGES[randomIndex];
+  });
 
   useEffect(() => {
     async function fetchData() {
@@ -248,12 +258,12 @@ export default function App() {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `url(${heroBg})`,
+            backgroundImage: `url(${selectedBg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center top',
             backgroundRepeat: 'no-repeat',
-          }}
-        />
+          }}/>
+        {/* mantenha o restante das divs de overlay, texto e botões normalmente */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,5,8,0.35)' }} />
         <div
           style={{
