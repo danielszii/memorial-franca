@@ -29,9 +29,9 @@ export default function App() {
       const API_URL = 'https://memorial-franca.onrender.com'
       try {
         const [resEras, resMembers] = await Promise.all([
-        axios.get(`${API_URL}/franca/eras`),
-        axios.get(`${API_URL}/franca/members`),
-])
+          axios.get(`${API_URL}/franca/eras`),
+          axios.get(`${API_URL}/franca/members`),
+        ])
         setEras(resEras.data)
         setMembers(resMembers.data)
         if (resEras.data.length > 0) {
@@ -339,8 +339,13 @@ export default function App() {
             </p>
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <a
-                href="#membros"
+              {/* Botão LES FRANÇAIS */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('membros')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -353,22 +358,29 @@ export default function App() {
                   background: '#ffffff',
                   padding: '12px 28px',
                   borderRadius: '3px',
-                  textDecoration: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
                   transition: 'opacity 0.2s, transform 0.2s',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.opacity = '0.88'
-                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.opacity = '0.88';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.opacity = '1'
-                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
                 LES FRANÇAIS →
-              </a>
-              <a
-                href="#linha-do-tempo"
+              </button>
+
+              {/* Botão VER HISTÓRIA */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('linha-do-tempo')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -382,20 +394,20 @@ export default function App() {
                   border: '1px solid rgba(255,255,255,0.18)',
                   padding: '12px 28px',
                   borderRadius: '3px',
-                  textDecoration: 'none',
+                  cursor: 'pointer',
                   transition: 'border-color 0.2s, color 0.2s',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'
-                  e.currentTarget.style.color = '#fff'
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)';
+                  e.currentTarget.style.color = '#fff';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.7)'
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
                 }}
               >
                 VER HISTÓRIA
-              </a>
+              </button>
             </div>
           </div>
         </div>
