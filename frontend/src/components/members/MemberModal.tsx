@@ -4,13 +4,24 @@ import { rankColor, versionColors } from '../../constants/theme'
 import { RankBadge, StatusDot, VersionBadge } from '../common/Badges'
 
 export function MemberModal({ member, onClose }: { member: Member; onClose: () => void }) {
-  // Normaliza o rank para array
   const rawRanks = Array.isArray(member.rank) ? member.rank : [member.rank]
   const ranks = rawRanks.filter(Boolean)
 
   const primaryRank = (ranks[0] || 'Membro') as Rank
-  const rc = rankColor[primaryRank] || '#4a5568'
+  const rc = (rankColor as Record<string, string>)[primaryRank] || '#4a5568'
   const isLegend = member.id === 1 || member.id === 8
+
+  // Captura as redes sociais de qualquer formato que venha da API
+  const m = member as any
+  const socials = {
+    instagram: m.socials?.instagram || m.instagram,
+    twitch: m.socials?.twitch || m.twitch,
+    youtube: m.socials?.youtube || m.youtube,
+    tiktok: m.socials?.tiktok || m.tiktok,
+    twitter: m.socials?.twitter || m.twitter,
+  }
+
+  const hasAnySocial = Object.values(socials).some(Boolean)
 
   return (
     <div
@@ -72,7 +83,6 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
                 >
                   {member.nick.toUpperCase()}
                 </h2>
-                {/* ── Badges de Ranks Múltiplos no Modal ── */}
                 <div className="flex flex-wrap gap-1">
                   {ranks.map((r, idx) => (
                     <RankBadge key={`${r}-${idx}`} rank={r} />
@@ -105,46 +115,160 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
 
           <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
 
+          {/* ── Grid 2x2: Status, Redes Sociais, Cargo e Eras ── */}
           <div className="grid grid-cols-2 gap-3 mb-5">
-            {[
-              {
-                label: 'STATUS',
-                value: (
-                  <span className="flex items-center">
-                    <StatusDot status={member.status} />
-                    <span style={{ color: '#f5f5f5', fontSize: 13 }}>{member.status}</span>
-                  </span>
-                ),
-              },
-              { label: 'DESDE', value: member.joined },
-              { label: 'CARGO', value: member.role },
-              { label: 'ERAS', value: `${member.versions?.length || 0} versões` },
-            ].map(({ label, value }) => (
+            {/* 1. STATUS */}
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                padding: '10px 12px',
+              }}
+            >
               <div
-                key={label}
                 style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '4px',
-                  padding: '10px 12px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: '#4a4a4a',
+                  letterSpacing: '0.08em',
+                  marginBottom: 4,
                 }}
               >
-                <div
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10,
-                    color: '#4a4a4a',
-                    letterSpacing: '0.08em',
-                    marginBottom: 4,
-                  }}
-                >
-                  {label}
-                </div>
-                <div style={{ fontSize: 13, color: '#d4d4d4', fontWeight: 500 }}>{value}</div>
+                STATUS
               </div>
-            ))}
+              <div className="flex items-center">
+                <StatusDot status={member.status} />
+                <span style={{ color: '#f5f5f5', fontSize: 13, fontWeight: 500 }}>
+                  {member.status || 'Ativo'}
+                </span>
+              </div>
+            </div>
+
+            {/* 2. REDES SOCIAIS (Substituindo o "DESDE") */}
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                padding: '10px 12px',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: '#4a4a4a',
+                  letterSpacing: '0.08em',
+                  marginBottom: 4,
+                }}
+              >
+                REDES SOCIAIS
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {hasAnySocial ? (
+                  <>
+                    {socials.instagram && (
+                      <a
+                        href={socials.instagram.startsWith('http') ? socials.instagram : `https://instagram.com/${socials.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#ED2939]/15 text-[#ED2939] border border-[#ED2939]/30 hover:bg-[#ED2939]/30 transition"
+                      >
+                        IG
+                      </a>
+                    )}
+                    {socials.twitch && (
+                      <a
+                        href={socials.twitch.startsWith('http') ? socials.twitch : `https://twitch.tv/${socials.twitch}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition"
+                      >
+                        TWITCH
+                      </a>
+                    )}
+                    {socials.youtube && (
+                      <a
+                        href={socials.youtube.startsWith('http') ? socials.youtube : `https://youtube.com/@${socials.youtube}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-red-600/15 text-red-500 border border-red-600/30 hover:bg-red-600/30 transition"
+                      >
+                        YT
+                      </a>
+                    )}
+                    {socials.tiktok && (
+                      <a
+                        href={socials.tiktok.startsWith('http') ? socials.tiktok : `https://tiktok.com/@${socials.tiktok.replace('@', '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/30 transition"
+                      >
+                        TK
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  <span style={{ fontSize: 11, color: '#5a5a5a', fontFamily: 'var(--font-mono)' }}>
+                    NÃO INFORMADO
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* 3. CARGO */}
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                padding: '10px 12px',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: '#4a4a4a',
+                  letterSpacing: '0.08em',
+                  marginBottom: 4,
+                }}
+              >
+                CARGO
+              </div>
+              <div style={{ fontSize: 13, color: '#d4d4d4', fontWeight: 500 }}>
+                {member.role || 'Membro'}
+              </div>
+            </div>
+
+            {/* 4. ERAS */}
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                padding: '10px 12px',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: '#4a4a4a',
+                  letterSpacing: '0.08em',
+                  marginBottom: 4,
+                }}
+              >
+                ERAS
+              </div>
+              <div style={{ fontSize: 13, color: '#d4d4d4', fontWeight: 500 }}>
+                {member.versions?.length || 0} versões
+              </div>
+            </div>
           </div>
 
+          {/* HISTÓRICO */}
           {member.bio && (
             <div
               style={{
@@ -171,6 +295,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
             </div>
           )}
 
+          {/* ERAS PARTICIPADAS */}
           <div className="mt-4">
             <div
               style={{
