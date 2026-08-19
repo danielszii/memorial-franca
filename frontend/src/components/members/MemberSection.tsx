@@ -1,19 +1,30 @@
 import React, { useState, useMemo } from 'react'
-import { Member } from '../../types/member'
-import { MemberCard } from './MemberCard'
+import { Member } from '../../types/memorial'
+import { MemberCard } from '../members/MemberCard'
 
 interface MemberSectionProps {
   members: Member[]
+  onSelectMember?: (member: Member) => void
 }
 
-export const MemberSection: React.FC<MemberSectionProps> = ({ members }) => {
+export const MemberSection: React.FC<MemberSectionProps> = ({ members, onSelectMember }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRank, setSelectedRank] = useState<string>('TODOS')
 
   const filteredMembers = useMemo(() => {
     return members.filter((member) => {
+      // 1. Busca por Nickname
       const matchesSearch = member.nick.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesRank = selectedRank === 'TODOS' || member.rank.toUpperCase() === selectedRank.toUpperCase()
+
+      // 2. Normaliza os ranks para array
+      const rawRanks = Array.isArray(member.rank) ? member.rank : [member.rank]
+      const memberRanks = rawRanks.filter(Boolean)
+
+      // 3. Filtro por Rank compatível com arrays
+      const matchesRank =
+        selectedRank === 'TODOS' ||
+        memberRanks.some((r) => String(r).toUpperCase() === selectedRank.toUpperCase())
+
       return matchesSearch && matchesRank
     })
   }, [members, searchTerm, selectedRank])
@@ -38,7 +49,7 @@ export const MemberSection: React.FC<MemberSectionProps> = ({ members }) => {
             className="bg-neutral-900 border border-neutral-800 text-xs px-4 py-2.5 rounded text-white focus:outline-none focus:border-red-600 transition"
           />
 
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
             {['TODOS', 'FUNDADOR', 'LÍDER', 'GERENTE', 'MEMBRO'].map((rank) => (
               <button
                 key={rank}
@@ -62,9 +73,13 @@ export const MemberSection: React.FC<MemberSectionProps> = ({ members }) => {
           NENHUM MEMBRO ENCONTRADO COM ESSE FILTRO.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMembers.map((member) => (
-            <MemberCard key={member.id} member={member} />
+            <MemberCard
+              key={member.id}
+              member={member}
+              onClick={() => onSelectMember?.(member)}
+            />
           ))}
         </div>
       )}

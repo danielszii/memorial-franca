@@ -22,3 +22,4 @@ export const navLinks: { label: string; id: string }[] = [
   { label: 'Títulos', id: 'conquistas' },
   { label: 'Galeria', id: 'galeria' },
 ]
+

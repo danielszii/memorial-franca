@@ -1,11 +1,17 @@
 import React from 'react'
-import { Member } from '../../types/memorial'
+import { Member, Rank } from '../../types/memorial'
 import { rankColor, versionColors } from '../../constants/theme'
 import { RankBadge, StatusDot, VersionBadge } from '../common/Badges'
 
 export function MemberModal({ member, onClose }: { member: Member; onClose: () => void }) {
-  const rc = rankColor[member.rank] || '#4a5568'
+  // Normaliza o rank para array
+  const rawRanks = Array.isArray(member.rank) ? member.rank : [member.rank]
+  const ranks = rawRanks.filter(Boolean)
+
+  const primaryRank = (ranks[0] || 'Membro') as Rank
+  const rc = rankColor[primaryRank] || '#4a5568'
   const isLegend = member.id === 1 || member.id === 8
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -66,7 +72,12 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
                 >
                   {member.nick.toUpperCase()}
                 </h2>
-                <RankBadge rank={member.rank} />
+                {/* ── Badges de Ranks Múltiplos no Modal ── */}
+                <div className="flex flex-wrap gap-1">
+                  {ranks.map((r, idx) => (
+                    <RankBadge key={`${r}-${idx}`} rank={r} />
+                  ))}
+                </div>
               </div>
               <div
                 style={{
@@ -79,7 +90,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
                 {member.discord}
               </div>
               <div className="flex items-center gap-1 flex-wrap">
-                {member.versions.map(v => (
+                {member.versions?.map(v => (
                   <VersionBadge key={v} v={v} />
                 ))}
               </div>
@@ -107,7 +118,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
               },
               { label: 'DESDE', value: member.joined },
               { label: 'CARGO', value: member.role },
-              { label: 'ERAS', value: `${member.versions.length} versões` },
+              { label: 'ERAS', value: `${member.versions?.length || 0} versões` },
             ].map(({ label, value }) => (
               <div
                 key={label}
@@ -134,29 +145,31 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
             ))}
           </div>
 
-          <div
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '4px',
-              padding: '12px',
-            }}
-          >
+          {member.bio && (
             <div
               style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10,
-                color: '#4a4a4a',
-                letterSpacing: '0.08em',
-                marginBottom: 8,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                padding: '12px',
               }}
             >
-              HISTÓRICO
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: '#4a4a4a',
+                  letterSpacing: '0.08em',
+                  marginBottom: 8,
+                }}
+              >
+                HISTÓRICO
+              </div>
+              <p style={{ fontSize: 13, color: '#9a9a9a', lineHeight: 1.7, margin: 0 }}>
+                {member.bio}
+              </p>
             </div>
-            <p style={{ fontSize: 13, color: '#9a9a9a', lineHeight: 1.7, margin: 0 }}>
-              {member.bio}
-            </p>
-          </div>
+          )}
 
           <div className="mt-4">
             <div
@@ -172,7 +185,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
             </div>
             <div className="flex items-center gap-0">
               {['1.0', '2.0', '3.0', '4.0', '5.0', '6.0'].map((v, i) => {
-                const active = member.versions.includes(v)
+                const active = member.versions?.includes(v)
                 const c = versionColors[v]
                 return (
                   <div key={v} className="flex items-center flex-1">
@@ -214,7 +227,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: 9,
-                    color: member.versions.includes(v) ? versionColors[v] : '#333',
+                    color: member.versions?.includes(v) ? versionColors[v] : '#333',
                   }}
                 >
                   {v}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Member } from '../../types/memorial'
+import { Member, Rank } from '../../types/memorial'
 import { rankColor } from '../../constants/theme'
 import { RankBadge, StatusDot, VersionBadge } from '../common/Badges'
 
@@ -9,7 +9,14 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, onClick }: MemberCardProps) {
-  const rc = rankColor[member.rank] || '#4a5568'
+  // Normaliza o rank para array
+  const rawRanks = Array.isArray(member.rank) ? member.rank : [member.rank]
+  const ranks = rawRanks.filter(Boolean)
+
+  // Rank primário para guiar a cor da borda/acento
+  const primaryRank = (ranks[0] || 'Membro') as Rank
+  const rc = rankColor[primaryRank] || '#4a5568'
+
   const isLegend = member.id === 1 || member.id === 8
   const displayNick = member.id === 1 ? 'Connor' : member.nick
 
@@ -21,7 +28,7 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
         border: '1px solid rgba(255,255,255,0.07)',
         borderRadius: '6px',
         padding: '20px',
-        cursor: 'pointer',
+        cursor: onClick ? 'pointer' : 'default',
         transition: 'transform 0.18s, border-color 0.18s, box-shadow 0.18s',
         position: 'relative',
         overflow: 'hidden',
@@ -112,8 +119,11 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
         </div>
       </div>
 
-      <div className="mb-3">
-        <RankBadge rank={member.rank} />
+      {/* ── Badges de Ranks Múltiplos ── */}
+      <div className="flex flex-wrap gap-1 mb-3">
+        {ranks.map((r, idx) => (
+          <RankBadge key={`${r}-${idx}`} rank={r} />
+        ))}
       </div>
 
       <div
@@ -132,7 +142,7 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 12 }} />
 
       <div className="flex flex-wrap gap-1">
-        {member.versions.map(v => (
+        {member.versions?.map(v => (
           <VersionBadge key={v} v={v} />
         ))}
       </div>

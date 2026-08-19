@@ -4,7 +4,7 @@ export interface Member {
   id: number
   nick: string
   discord: string
-  rank: Rank
+  rank: Rank[] | Rank
   versions: string[]
   role: string
   avatar: string
