@@ -54,11 +54,10 @@ export const MemberSection: React.FC<MemberSectionProps> = ({ members, onSelectM
               <button
                 key={rank}
                 onClick={() => setSelectedRank(rank)}
-                className={`text-[10px] font-mono uppercase px-3 py-2 rounded transition cursor-pointer ${
-                  selectedRank === rank
+                className={`text-[10px] font-mono uppercase px-3 py-2 rounded transition cursor-pointer ${selectedRank === rank
                     ? 'bg-red-600 text-white font-bold'
                     : 'bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800'
-                }`}
+                  }`}
               >
                 {rank}
               </button>

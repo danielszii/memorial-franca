@@ -1,16 +1,31 @@
+import { MemberRank } from "./member"
+
 export type Rank = 'Fundador' | 'Líder' | 'Gerente' | 'Membro'
+
+export interface MemberSocials {
+  instagram?: string
+  twitch?: string
+  youtube?: string
+  tiktok?: string
+  twitter?: string
+}
 
 export interface Member {
   id: number
   nick: string
   discord: string
-  rank: Rank[] | Rank
-  versions: string[]
+  rank: string[] | string | Rank | Rank[]
   role: string
   avatar: string
-  bio: string
-  joined: string
-  status: 'Ativo' | 'Inativo' | 'Veterano'
+  status?: string
+  bio?: string
+  versions?: string[]
+  joined?: string
+  socials?: MemberSocials
+  instagram?: string
+  twitch?: string
+  youtube?: string
+  tiktok?: string
 }
 
 export interface Era {

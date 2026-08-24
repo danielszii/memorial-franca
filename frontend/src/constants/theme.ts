@@ -20,6 +20,6 @@ export const navLinks: { label: string; id: string }[] = [
   { label: 'História', id: 'linha-do-tempo' },
   { label: 'Membros', id: 'membros' },
   { label: 'Títulos', id: 'conquistas' },
-  { label: 'Galeria', id: 'galeria' },
+  { label: 'Em Breve', id: 'em-breve' },
 ]
 

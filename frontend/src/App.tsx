@@ -11,6 +11,8 @@ import { MemberModal } from './components/members/MemberModal'
 import { EraTimeline } from './components/eras/EraTimeline'
 import { HonorsSection } from './components/layout/HonorsSection'
 import { GallerySection } from './components/layout/GallerySection'
+import { DevDonationModal } from './components/common/DevDonationModal'
+import { OnlineWidget } from './components/common/OnlineWidget'
 
 const HERO_IMAGES = [
   heroBg1,
@@ -25,6 +27,7 @@ export default function App() {
   const [filterVersion, setFilterVersion] = useState('Todas')
   const [filterRank, setFilterRank] = useState('Todos')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
+  const [donationModalOpen, setDonationModalOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -68,8 +71,9 @@ export default function App() {
     const matchSearch =
       m.nick.toLowerCase().includes(search.toLowerCase()) ||
       m.discord.toLowerCase().includes(search.toLowerCase())
-    const matchVersion = filterVersion === 'Todas' || m.versions.includes(filterVersion)
-    const matchRank = filterRank === 'Todos' || m.rank === filterRank
+    const matchVersion = filterVersion === 'Todas' || m.versions?.includes(filterVersion)
+    const rawRanks = Array.isArray(m.rank) ? m.rank : [m.rank]
+    const matchRank = filterRank === 'Todos' || rawRanks.some(r => String(r).toUpperCase() === filterRank.toUpperCase())
     return matchSearch && matchVersion && matchRank
   })
 
@@ -120,12 +124,13 @@ export default function App() {
         }}
       >
         <div className="max-w-screen-xl mx-auto px-10 flex items-center justify-between" style={{ height: 72 }}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img
               src={logoFra}
               alt="França"
               style={{ height: 34, width: 'auto', filter: 'drop-shadow(0 0 6px rgba(255,255,255,0.2))' }}
             />
+            <OnlineWidget />
           </div>
 
           <div className="hidden md:flex items-center gap-8">
@@ -150,6 +155,38 @@ export default function App() {
                 {label.toUpperCase()}
               </button>
             ))}
+            {/* Botão de Apoio / Vaquinha (ao lado esquerdo do Instagram) */}
+            <button
+              type="button"
+              onClick={() => setDonationModalOpen(true)}
+              title="Apoie o Memorial — Vaquinha Oficial"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                letterSpacing: '0.08em',
+                color: '#f5f5f5',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                padding: '8px 16px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.12)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+              }}
+            >
+              APOIAR
+            </button>
+
             <a
               href="https://www.instagram.com/francarpoficial"
               target="_blank"
@@ -225,6 +262,33 @@ export default function App() {
                 {label.toUpperCase()}
               </button>
             ))}
+
+            <button
+              type="button"
+              onClick={() => {
+                setDonationModalOpen(true)
+                setMenuOpen(false)
+              }}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                letterSpacing: '0.08em',
+                color: '#fff',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                padding: '8px 16px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              APOIAR MEMORIAL (LIVEPIX)
+            </button>
+
             <a
               href="https://www.instagram.com/francarpoficial"
               target="_blank"
@@ -242,6 +306,7 @@ export default function App() {
                 textAlign: 'center',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: 6,
               }}
               onClick={() => setMenuOpen(false)}
@@ -689,8 +754,8 @@ export default function App() {
       {/* ── Títulos & Honras ── */}
       <HonorsSection />
 
-      {/* ── Galeria ── */}
-      <GallerySection eras={eras} />
+      {/* ── Seções em Desenvolvimento ── */}
+      <GallerySection />
 
       {/* ── Footer ── */}
       <footer
@@ -728,22 +793,30 @@ export default function App() {
                 >
                   NAVEGAÇÃO
                 </div>
-                {['Linha do Tempo', 'Hall da Fama', 'Estatísticas', 'Galeria'].map(l => (
-                  <div key={l} style={{ marginBottom: 8 }}>
-                    <a
-                      href="#"
+                {[
+                  { label: 'Linha do Tempo', id: 'linha-do-tempo' },
+                  { label: 'Les Français', id: 'membros' },
+                  { label: 'Conquistas', id: 'conquistas' },
+                  { label: 'Em Breve', id: 'em-breve' },
+                ].map(({ label, id }) => (
+                  <div key={id} style={{ marginBottom: 8 }}>
+                    <button
+                      onClick={() => scrollTo(id)}
                       style={{
                         fontSize: 12,
                         color: '#5a5a5a',
-                        textDecoration: 'none',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
                         letterSpacing: '0.03em',
                         transition: 'color 0.2s',
                       }}
                       onMouseEnter={e => (e.currentTarget.style.color = '#f5f5f5')}
                       onMouseLeave={e => (e.currentTarget.style.color = '#5a5a5a')}
                     >
-                      {l}
-                    </a>
+                      {label}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -802,6 +875,28 @@ export default function App() {
             >
               © 2024 FACÇÃO FRANÇA — TODOS OS DIREITOS RESERVADOS
             </span>
+            <button
+              type="button"
+              onClick={() => setDonationModalOpen(true)}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10,
+                color: '#3a3a3a',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                letterSpacing: '0.08em',
+                padding: 0,
+                transition: 'color 0.2s',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#3a3a3a')}
+            >
+              APOIAR O PROJETO
+            </button>
             <span
               style={{
                 fontFamily: 'var(--font-mono)',
@@ -815,6 +910,12 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* ── Developer Donation Modal ── */}
+      <DevDonationModal
+        isOpen={donationModalOpen}
+        onClose={() => setDonationModalOpen(false)}
+      />
 
       {/* ── Member Modal ── */}
       {selectedMember && (

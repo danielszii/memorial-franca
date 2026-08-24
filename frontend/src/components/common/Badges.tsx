@@ -22,8 +22,8 @@ export function VersionBadge({ v }: { v: string }) {
   )
 }
 
-export function RankBadge({ rank }: { rank: Rank }) {
-  const c = rankColor[rank] || '#4a5568'
+export function RankBadge({ rank }: { rank: Rank | string }) {
+  const c = (rankColor as Record<string, string>)[rank] || '#4a5568'
   const isGold = rank === 'Fundador' || rank === 'Líder'
   return (
     <span
@@ -46,17 +46,18 @@ export function RankBadge({ rank }: { rank: Rank }) {
   )
 }
 
-export function StatusDot({ status }: { status: Member['status'] }) {
-  const colors = { Ativo: '#ED2939', Inativo: '#4b5563', Veterano: '#002395' }
+export function StatusDot({ status }: { status?: string }) {
+  const colors: Record<string, string> = { Ativo: '#ED2939', Inativo: '#4b5563', Veterano: '#002395' }
+  const bg = (status && colors[status]) || '#4b5563'
   return (
     <span
       style={{
         width: 7,
         height: 7,
         borderRadius: '50%',
-        background: colors[status] || '#4b5563',
+        background: bg,
         display: 'inline-block',
-        boxShadow: `0 0 6px ${colors[status] || '#4b5563'}`,
+        boxShadow: `0 0 6px ${bg}`,
         marginRight: 5,
         flexShrink: 0,
       }}

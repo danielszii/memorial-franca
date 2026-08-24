@@ -9,21 +9,30 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-app.use(cors())
+// Desabilita identificação do servidor para maior segurança
+app.disable('x-powered-by')
+
+// Headers de segurança básicos
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN')
+  res.setHeader('X-XSS-Protection', '1; mode=block')
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+  next()
+})
+
 app.use(express.json())
 
+// CORS configurado apenas para métodos de leitura seguros (GET, HEAD)
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'https://memorialfranca.com.br',
-      'https://www.memorialfranca.com.br',
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: '*',
+    methods: ['GET', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 )
 
-// Rotas da API
+// Rotas da API (Apenas rotas GET seguras de leitura)
 app.use('/franca', routes)
 
 // Middleware Global de Tratamento de Erros (sempre por último)

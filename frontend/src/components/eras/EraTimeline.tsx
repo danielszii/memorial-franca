@@ -1,5 +1,6 @@
 import React from 'react'
 import { Era } from '../../types/memorial'
+import { MusicPlayer } from '../common/MusicPlayer'
 
 interface EraTimelineProps {
   eras: Era[]
@@ -21,7 +22,7 @@ export function EraTimeline({ eras, activeEra, setActiveEra }: EraTimelineProps)
       }}
     >
       <div className="max-w-screen-xl mx-auto px-10">
-        <div className="mb-10">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
           <h2
             style={{
               fontFamily: 'var(--font-display)',
@@ -34,6 +35,8 @@ export function EraTimeline({ eras, activeEra, setActiveEra }: EraTimelineProps)
           >
             HISTOIRE DE FRANCE
           </h2>
+
+          <MusicPlayer />
         </div>
 
         <div
