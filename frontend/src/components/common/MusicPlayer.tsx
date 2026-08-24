@@ -42,6 +42,7 @@ export function MusicPlayer() {
 
     try {
       playerRef.current = new window.YT.Player(containerId, {
+        host: 'https://www.youtube-nocookie.com',
         height: '1',
         width: '1',
         videoId: videoId,
@@ -54,6 +55,7 @@ export function MusicPlayer() {
           playlist: videoId,
           modestbranding: 1,
           rel: 0,
+          origin: window.location.origin,
         },
         events: {
           onReady: (event: any) => {
