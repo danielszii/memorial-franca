@@ -54,6 +54,11 @@ export function HonorsSection() {
   const [selectedId, setSelectedId] = useState<string>('bgc-3')
   const currentTitle = titlesData.find(t => t.id === selectedId) || titlesData[0]
 
+  const isSilver = selectedId === 'bgc-2'
+  const primaryColor = isSilver ? '#b0b0b0' : '#c9a84c'
+  const secondaryColor = isSilver ? '#e5e7eb' : '#ffd700'
+  const glowColor = isSilver ? 'rgba(176,176,176,0.1)' : 'rgba(201,168,76,0.08)'
+
   return (
     <section
       id="conquistas"
@@ -82,7 +87,9 @@ export function HonorsSection() {
 
         {/* ── Banner Principal com o Troféu ── */}
         <div
-          className="relative w-full rounded-xl overflow-hidden border border-[#c9a84c]/20 transition-all duration-300"
+          className={`relative w-full rounded-xl overflow-hidden border ${
+            isSilver ? 'border-[#b0b0b0]/20' : 'border-[#c9a84c]/20'
+          } transition-all duration-300`}
           style={{
             minHeight: '460px',
             backgroundImage: `url("${encodeURI(currentTitle.bannerImage)}")`,
@@ -90,18 +97,18 @@ export function HonorsSection() {
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundColor: '#050505',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.9), 0 0 40px rgba(201,168,76,0.08)',
+            boxShadow: `0 20px 50px rgba(0,0,0,0.9), 0 0 40px ${glowColor}`,
           }}
         >
-          {/* Degradê para garantir contraste com o texto no mobile e desktop */}
+          {/* Degradê para garantir contraste com o text no mobile e desktop */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#070707] via-[#070707]/90 to-transparent md:w-3/4 w-full pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-transparent to-transparent md:hidden pointer-events-none" />
 
-          {/* Linha de brilho superior dourada */}
+          {/* Linha de brilho superior */}
           <div
             className="absolute top-0 left-0 right-0 h-[2px]"
             style={{
-              background: 'linear-gradient(90deg, transparent, #c9a84c, #ffd700, transparent)',
+              background: `linear-gradient(90deg, transparent, ${primaryColor}, ${secondaryColor}, transparent)`,
             }}
           />
 
@@ -111,15 +118,18 @@ export function HonorsSection() {
             <div className="flex items-center gap-2 mb-6">
               {titlesData.map(item => {
                 const active = item.id === selectedId
+                const itemIsSilver = item.id === 'bgc-2'
+                const itemPrimary = itemIsSilver ? '#b0b0b0' : '#c9a84c'
+                const itemSecondary = itemIsSilver ? '#e5e7eb' : '#ffd700'
                 return (
                   <button
                     key={item.id}
                     onClick={() => setSelectedId(item.id)}
                     className="transition-all duration-200 font-mono text-xs uppercase px-3 py-1.5 rounded"
                     style={{
-                      background: active ? '#c9a84c' : 'rgba(255,255,255,0.05)',
+                      background: active ? itemPrimary : 'rgba(255,255,255,0.05)',
                       color: active ? '#000' : '#888',
-                      border: active ? '1px solid #ffd700' : '1px solid rgba(255,255,255,0.1)',
+                      border: active ? `1px solid ${itemSecondary}` : '1px solid rgba(255,255,255,0.1)',
                       fontWeight: active ? 700 : 500,
                     }}
                   >
@@ -131,7 +141,10 @@ export function HonorsSection() {
 
             {/* Textos Principais */}
             <div>
-              <div className="flex items-center gap-2 mb-2 font-mono text-xs text-[#c9a84c] tracking-widest uppercase">
+              <div
+                className="flex items-center gap-2 mb-2 font-mono text-xs tracking-widest uppercase"
+                style={{ color: primaryColor }}
+              >
                 <span>★ TROFÉU OFICIAL</span>
                 <span>•</span>
                 <span>{currentTitle.date}</span>
@@ -164,7 +177,10 @@ export function HonorsSection() {
                     <div className="text-[10px] font-mono text-[#555] tracking-wider mb-1">
                       {stat.label}
                     </div>
-                    <div className="text-sm md:text-base font-bold text-[#c9a84c] font-display">
+                    <div
+                      className="text-sm md:text-base font-bold font-display"
+                      style={{ color: primaryColor }}
+                    >
                       {stat.value}
                     </div>
                   </div>
