@@ -9,6 +9,10 @@ const memberController = new MemberController()
 const presenceController = new PresenceController()
 
 // Rotas
+router.get('/ping', (_req, res) => {
+  res.status(200).send('pong')
+})
+
 router.get('/eras', eraController.getAll)
 router.get('/eras/:version', eraController.getByVersion)
 

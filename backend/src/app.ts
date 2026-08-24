@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import https from 'https'
 import routes from './routes/routes'
 import { errorHandler } from './middlewares/error.middleware'
 
@@ -38,6 +39,38 @@ app.use('/franca', routes)
 // Middleware Global de Tratamento de Erros (sempre por último)
 app.use(errorHandler)
 
+function startSelfPing() {
+  const url = process.env.RENDER_EXTERNAL_URL || 'https://memorial-franca.onrender.com'
+  const INTERVAL = 10 * 60 * 1000 // 10 minutos
+
+  if (!process.env.RENDER_EXTERNAL_URL && process.env.NODE_ENV !== 'production') {
+    console.log('[Self-Ping] Ignorado em ambiente de desenvolvimento local.')
+    return
+  }
+
+  console.log(`[Self-Ping] Inicializado. Pingando ${url}/franca/ping a cada 10 minutos.`)
+
+  // Faz um ping inicial após 30 segundos da inicialização para validar
+  setTimeout(() => {
+    https.get(`${url}/franca/ping`, (res) => {
+      console.log(`[Self-Ping] Ping inicial: status ${res.statusCode}`)
+    }).on('error', (err) => {
+      console.error('[Self-Ping] Erro no ping inicial:', err.message)
+    })
+  }, 30000)
+
+  setInterval(() => {
+    https
+      .get(`${url}/franca/ping`, (res) => {
+        console.log(`[Self-Ping] Resposta recebida: ${res.statusCode}`)
+      })
+      .on('error', (err) => {
+        console.error('[Self-Ping] Erro ao realizar ping:', err.message)
+      })
+  }, INTERVAL)
+}
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`)
+  startSelfPing()
 })
