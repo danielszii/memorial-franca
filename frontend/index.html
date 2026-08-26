@@ -5,6 +5,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Memorial França</title>
+    <script>
+      // Bloquear o menu de contexto (botão direito)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
+      // Bloquear teclas de atalho do desenvolvedor (F12, Ctrl+Shift+I, etc.)
+      document.addEventListener('keydown', function(e) {
+        // Bloquear F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+          e.preventDefault();
+          return false;
+        }
+
+        // Bloquear Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (Windows/Linux)
+        // Bloquear Cmd+Alt+I, Cmd+Alt+J, Cmd+Alt+C (macOS)
+        if (
+          (e.ctrlKey || e.metaKey) &&
+          (e.shiftKey || e.altKey) &&
+          (e.key === 'I' || e.key === 'i' || 
+           e.key === 'J' || e.key === 'j' || 
+           e.key === 'C' || e.key === 'c' ||
+           e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)
+        ) {
+          e.preventDefault();
+          return false;
+        }
+
+        // Bloquear Ctrl+U (Windows/Linux) ou Cmd+Alt+U (macOS) - Exibir Código Fonte
+        if (
+          (e.ctrlKey || e.metaKey) &&
+          (e.key === 'U' || e.key === 'u' || e.keyCode === 85)
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      });
+    </script>
   </head>
   <body style="margin: 0; background-color: #080808;">
     <div id="root"></div>
