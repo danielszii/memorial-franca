@@ -16,7 +16,7 @@ import { OnlineWidget } from './components/common/OnlineWidget'
 
 const HERO_IMAGES = [
   heroBg1,
-  heroBg2,
+  // heroBg2,
 ];
 
 export default function App() {
