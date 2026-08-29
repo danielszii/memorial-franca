@@ -8,6 +8,7 @@ export interface MemberSocials {
   youtube?: string
   tiktok?: string
   twitter?: string
+  kick?: string
 }
 
 export interface Member {
@@ -26,6 +27,9 @@ export interface Member {
   twitch?: string
   youtube?: string
   tiktok?: string
+  kick?: string
+  is_live?: boolean
+  live_url?: string
 }
 
 export interface Era {

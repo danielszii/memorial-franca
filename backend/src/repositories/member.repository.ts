@@ -14,6 +14,13 @@ export class MemberRepository {
         m.bio,
         m.joined,
         m.status,
+        m.twitch,
+        m.youtube,
+        m.instagram,
+        m.tiktok,
+        m.kick,
+        m.is_live,
+        m.live_url,
         COALESCE(
           ARRAY_AGG(mv.era_version ORDER BY mv.era_version ASC) FILTER (WHERE mv.era_version IS NOT NULL),
           ARRAY[]::VARCHAR[]
@@ -40,6 +47,13 @@ export class MemberRepository {
         m.bio,
         m.joined,
         m.status,
+        m.twitch,
+        m.youtube,
+        m.instagram,
+        m.tiktok,
+        m.kick,
+        m.is_live,
+        m.live_url,
         COALESCE(
           ARRAY_AGG(mv.era_version ORDER BY mv.era_version ASC) FILTER (WHERE mv.era_version IS NOT NULL),
           ARRAY[]::VARCHAR[]
@@ -56,7 +70,7 @@ export class MemberRepository {
   async findByNick(nick: string): Promise<MemberResponseDTO | null> {
     // Parâmetro $1 impede injeções por texto/nick
     const query = `
-      SELECT id, nick, discord, rank, role, avatar, bio, joined, status
+      SELECT id, nick, discord, rank, role, avatar, bio, joined, status, twitch, youtube, instagram, tiktok, kick, is_live, live_url
       FROM members
       WHERE LOWER(nick) = LOWER($1);
     `
@@ -72,8 +86,8 @@ export class MemberRepository {
 
       // Inserção parametrizada na tabela principal
       const insertMemberQuery = `
-        INSERT INTO members (nick, discord, rank, role, avatar, bio, status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO members (nick, discord, rank, role, avatar, bio, status, twitch, youtube, instagram, tiktok, kick, is_live, live_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING id;
       `
       const values = [
@@ -84,6 +98,13 @@ export class MemberRepository {
         data.avatar || null,
         data.bio || '',
         data.status || 'Ativo',
+        data.twitch || null,
+        data.youtube || null,
+        data.instagram || null,
+        data.tiktok || null,
+        data.kick || null,
+        data.is_live || false,
+        data.live_url || null,
       ]
 
       const { rows } = await client.query(insertMemberQuery, values)

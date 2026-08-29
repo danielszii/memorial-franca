@@ -86,23 +86,74 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
           <img src={member.avatar} alt={member.nick} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <StatusDot status={member.status} />
-            <span
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-                fontSize: 16,
-                letterSpacing: '0.06em',
-                color: '#f5f5f5',
-                textTransform: 'uppercase',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {displayNick}
-            </span>
+          <div className="flex items-center gap-2 mb-1 min-w-0 w-full justify-between">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <StatusDot status={member.status} />
+              <span
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: 16,
+                  letterSpacing: '0.06em',
+                  color: '#f5f5f5',
+                  textTransform: 'uppercase',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+                title={displayNick}
+              >
+                {displayNick}
+              </span>
+            </div>
+            {member.is_live && (
+              <a
+                href={member.live_url || (member.twitch ? (member.twitch.startsWith('http') ? member.twitch : `https://twitch.tv/${member.twitch}`) : '#')}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  borderRadius: '4px',
+                  padding: '2px 6px',
+                  fontSize: '9px',
+                  fontWeight: 800,
+                  color: '#fca5a5',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, border-color 0.2s, transform 0.2s',
+                  boxShadow: '0 0 10px rgba(239, 68, 68, 0.1)',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)'
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)'
+                  e.currentTarget.style.transform = 'scale(1.05)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)'
+                  e.currentTarget.style.transform = 'scale(1)'
+                }}
+              >
+                <span
+                  className="live-indicator-dot"
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ef4444',
+                    display: 'inline-block',
+                  }}
+                />
+                AO VIVO
+              </a>
+            )}
           </div>
           <div
             style={{

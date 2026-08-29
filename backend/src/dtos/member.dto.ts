@@ -12,6 +12,13 @@ export interface MemberResponseDTO {
   bio: string
   joined: string
   status: MemberStatus
+  twitch?: string
+  youtube?: string
+  instagram?: string
+  tiktok?: string
+  kick?: string
+  is_live?: boolean
+  live_url?: string
 }
 
 export interface CreateMemberDTO {
@@ -24,4 +31,11 @@ export interface CreateMemberDTO {
   joined: string
   status: MemberStatus
   versions: string[]
+  twitch?: string
+  youtube?: string
+  instagram?: string
+  tiktok?: string
+  kick?: string
+  is_live?: boolean
+  live_url?: string
 }

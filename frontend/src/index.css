@@ -50,3 +50,22 @@ body {
 @media (min-width: 1280px) {
   html { font-size: 16px; }
 }
+
+@keyframes live-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.live-indicator-dot {
+  animation: live-pulse 1.8s infinite ease-in-out;
+}

@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import https from 'https'
 import routes from './routes/routes'
 import { errorHandler } from './middlewares/error.middleware'
+import { LiveSyncService } from './services/live-sync.service'
 
 dotenv.config()
 
@@ -73,4 +74,6 @@ function startSelfPing() {
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`)
   startSelfPing()
+  // Inicia o sincronizador automático de lives (a cada 2 minutos)
+  LiveSyncService.startScheduler()
 })
