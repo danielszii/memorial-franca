@@ -12,7 +12,7 @@ export const MemberSection: React.FC<MemberSectionProps> = ({ members, onSelectM
   const [selectedRank, setSelectedRank] = useState<string>('TODOS')
 
   const filteredMembers = useMemo(() => {
-    return members.filter((member) => {
+    const filtered = members.filter((member) => {
       // 1. Busca por Nickname
       const matchesSearch = member.nick.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -27,6 +27,12 @@ export const MemberSection: React.FC<MemberSectionProps> = ({ members, onSelectM
 
       return matchesSearch && matchesRank
     })
+
+    const legends = filtered.filter(m => m.id === 1 || m.id === 8).sort((a, b) => a.id - b.id)
+    const rest = filtered.filter(m => m.id !== 1 && m.id !== 8)
+    const onlineStreamers = rest.filter(m => m.is_live)
+    const offlineOthers = rest.filter(m => !m.is_live)
+    return [...legends, ...onlineStreamers, ...offlineOthers]
   }, [members, searchTerm, selectedRank])
 
   return (

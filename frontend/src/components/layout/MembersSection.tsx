@@ -42,7 +42,9 @@ export function MembersSection({ members, onSelectMember }: MembersSectionProps)
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const legends = filtered.filter(m => m.id === 1 || m.id === 8).sort((a, b) => a.id - b.id)
   const rest = filtered.filter(m => m.id !== 1 && m.id !== 8)
-  const sortedFiltered = [...legends, ...rest]
+  const onlineStreamers = rest.filter(m => m.is_live)
+  const offlineOthers = rest.filter(m => !m.is_live)
+  const sortedFiltered = [...legends, ...onlineStreamers, ...offlineOthers]
   const paginated = sortedFiltered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   return (
