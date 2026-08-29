@@ -9,7 +9,7 @@ const Icons = {
     <img
       src="https://logos.lndev.me/logos/instagram.svg"
       alt="Instagram"
-      style={{ width: 12, height: 12, objectFit: 'contain' }}
+      style={{ width: 12, height: 12, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
     />
   ),
   Twitch: () => (
