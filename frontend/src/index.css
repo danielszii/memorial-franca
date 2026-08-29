@@ -69,3 +69,22 @@ body {
 .live-indicator-dot {
   animation: live-pulse 1.8s infinite ease-in-out;
 }
+
+@keyframes live-pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.live-indicator-dot-green {
+  animation: live-pulse-green 1.8s infinite ease-in-out;
+}

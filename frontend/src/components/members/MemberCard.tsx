@@ -20,6 +20,12 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
   const isLegend = member.id === 1 || member.id === 8
   const displayNick = member.id === 1 ? 'Connor' : member.nick
 
+  const hasStream = !!(member.twitch || member.kick || member.youtube)
+  const defaultStreamUrl = member.live_url || 
+    (member.twitch ? (member.twitch.startsWith('http') ? member.twitch : `https://twitch.tv/${member.twitch}`) :
+     member.kick ? (member.kick.startsWith('http') ? member.kick : `https://kick.com/${member.kick}`) :
+     member.youtube ? (member.youtube.startsWith('http') ? member.youtube : `https://youtube.com/@${member.youtube}`) : '#')
+
   return (
     <div
       onClick={onClick}
@@ -88,7 +94,6 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 min-w-0 w-full justify-between">
             <div className="flex items-center gap-1.5 min-w-0">
-              <StatusDot status={member.status} />
               <span
                 style={{
                   fontFamily: 'var(--font-display)',
@@ -106,53 +111,103 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
                 {displayNick}
               </span>
             </div>
-            {member.is_live && (
-              <a
-                href={member.live_url || (member.twitch ? (member.twitch.startsWith('http') ? member.twitch : `https://twitch.tv/${member.twitch}`) : '#')}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
-                  borderRadius: '4px',
-                  padding: '2px 6px',
-                  fontSize: '9px',
-                  fontWeight: 800,
-                  color: '#fca5a5',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s, border-color 0.2s, transform 0.2s',
-                  boxShadow: '0 0 10px rgba(239, 68, 68, 0.1)',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)'
-                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)'
-                  e.currentTarget.style.transform = 'scale(1.05)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'
-                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)'
-                  e.currentTarget.style.transform = 'scale(1)'
-                }}
-              >
-                <span
-                  className="live-indicator-dot"
+            {hasStream && (
+              member.is_live ? (
+                <a
+                  href={defaultStreamUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
                   style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ef4444',
-                    display: 'inline-block',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    borderRadius: '4px',
+                    padding: '2px 6px',
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    color: '#a7f3d0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, border-color 0.2s, transform 0.2s',
+                    boxShadow: '0 0 10px rgba(16, 185, 129, 0.1)',
+                    flexShrink: 0,
                   }}
-                />
-                AO VIVO
-              </a>
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(16, 185, 129, 0.25)'
+                    e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.6)'
+                    e.currentTarget.style.transform = 'scale(1.05)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(16, 185, 129, 0.12)'
+                    e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.4)'
+                    e.currentTarget.style.transform = 'scale(1)'
+                  }}
+                >
+                  <span
+                    className="live-indicator-dot-green"
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: '#10b981',
+                      display: 'inline-block',
+                    }}
+                  />
+                  AO VIVO
+                </a>
+              ) : (
+                <a
+                  href={defaultStreamUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    borderRadius: '4px',
+                    padding: '2px 6px',
+                    fontSize: '9px',
+                    fontWeight: 800,
+                    color: '#fca5a5',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s, border-color 0.2s, transform 0.2s',
+                    flexShrink: 0,
+                    opacity: 0.75,
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)'
+                    e.currentTarget.style.transform = 'scale(1.05)'
+                    e.currentTarget.style.opacity = '1'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
+                    e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'
+                    e.currentTarget.style.transform = 'scale(1)'
+                    e.currentTarget.style.opacity = '0.75'
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ef4444',
+                      display: 'inline-block',
+                    }}
+                  />
+                  OFFLINE
+                </a>
+              )
             )}
           </div>
           <div

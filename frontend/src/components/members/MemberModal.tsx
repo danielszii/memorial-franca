@@ -145,38 +145,11 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
 
           <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
 
-          {/* ── Grid 2x2 ── */}
+          {/* ── Grid adaptado (Sem seção Status) ── */}
           <div className="grid grid-cols-2 gap-3 mb-5">
-            {/* 1. STATUS */}
+            {/* 1. REDES SOCIAIS COM ÍCONES */}
             <div
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: '4px',
-                padding: '10px 12px',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10,
-                  color: '#4a4a4a',
-                  letterSpacing: '0.08em',
-                  marginBottom: 4,
-                }}
-              >
-                STATUS
-              </div>
-              <div className="flex items-center">
-                <StatusDot status={member.status} />
-                <span style={{ color: '#f5f5f5', fontSize: 13, fontWeight: 500 }}>
-                  {member.status || 'Ativo'}
-                </span>
-              </div>
-            </div>
-
-            {/* 2. REDES SOCIAIS COM ÍCONES */}
-            <div
+              className="col-span-2"
               style={{
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.06)',
