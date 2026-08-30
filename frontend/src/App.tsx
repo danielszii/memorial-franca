@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import logoFra from "./imports/Logo FRA x K.png";
 import heroBg1 from "./imports/Banner KROOZZNS.png";
-import heroBg2 from "./imports/Banner CORINGADAS.png";
 import { Era, Member, Rank } from './types/memorial'
 import { navLinks } from './constants/theme'
 import { scrollTo } from './utils/scroll'
@@ -16,7 +15,6 @@ import { OnlineWidget } from './components/common/OnlineWidget'
 
 const HERO_IMAGES = [
   heroBg1,
-  // heroBg2,
 ];
 
 export default function App() {

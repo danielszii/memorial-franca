@@ -1,5 +1,3 @@
-import { MemberRank } from "./member"
-
 export type Rank = 'Fundador' | 'Líder' | 'Gerente' | 'Membro'
 
 export interface MemberSocials {
