@@ -202,6 +202,66 @@ export class LiveSyncService {
         } catch (err) {
           console.error('[Live Sync] Erro ao sincronizar Twitch:', err)
         }
+      } else {
+        // Fallback: usar GraphQL da Twitch (não requer credenciais do desenvolvedor)
+        try {
+          console.log('[Live Sync] Twitch API Credentials não configuradas. Usando GQL Fallback...')
+          const twitchMembers = members.filter(m => m.twitch && m.twitch.trim() !== '')
+          if (twitchMembers.length > 0) {
+            const twitchUsernameToIdsMap = new Map<string, number[]>()
+            for (const m of twitchMembers) {
+              const username = this.extractUsername(m.twitch)
+              if (username) {
+                const list = twitchUsernameToIdsMap.get(username) || []
+                list.push(m.id)
+                twitchUsernameToIdsMap.set(username, list)
+              }
+            }
+
+            const allTwitchUsernames = Array.from(twitchUsernameToIdsMap.keys())
+            const batchSize = 25 // Limite amigável de lotes para GQL
+
+            for (let i = 0; i < allTwitchUsernames.length; i += batchSize) {
+              const batch = allTwitchUsernames.slice(i, i + batchSize)
+              const body = batch.map((username) => ({
+                operationName: 'StreamRefetch',
+                variables: {
+                  channel: username
+                },
+                query: 'query StreamRefetch($channel: String!) { user(login: $channel) { stream { id type } } }'
+              }))
+
+              const response = await fetch('https://gql.twitch.tv/gql', {
+                method: 'POST',
+                headers: {
+                  'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+              })
+
+              if (response.ok) {
+                const data = (await response.json()) as Array<{ data?: { user?: { stream?: { id: string; type: string } | null } | null } }>
+                data.forEach((item, index) => {
+                  const stream = item?.data?.user?.stream
+                  if (stream && stream.type === 'live') {
+                    const usernameLower = batch[index].toLowerCase()
+                    const ids = twitchUsernameToIdsMap.get(usernameLower)
+                    if (ids) {
+                      for (const id of ids) {
+                        liveMemberUrls.set(id, `https://twitch.tv/${usernameLower}`)
+                      }
+                    }
+                  }
+                })
+              } else {
+                console.error(`[Live Sync] Falha ao consultar Twitch GQL. Status: ${response.status}`)
+              }
+            }
+          }
+        } catch (err) {
+          console.error('[Live Sync] Erro ao sincronizar Twitch (GQL Fallback):', err)
+        }
       }
 
       // ─────────────────────────────────────────────────────────────────
