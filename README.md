@@ -4,7 +4,7 @@
   <img src="frontend/public/logo-fra.png" alt="Logo Franca" width="120" />
 </p>
 
-O Memorial Franca é uma plataforma web dedicada a registrar e preservar o legado histórico da comunidade Franca no ambiente FiveM, ativa desde 2020. O sistema documenta a evolução da facção ao longo de suas seis eras de história, detalhando seus líderes, sublíderes, conquistas competitivas (como os títulos da Batalha de Gangues da Cidade - BGC) e os perfis de todos os membros que fizeram parte desta trajetória.
+O Memorial Franca é uma plataforma web dedicada a registrar e preservar o legado histórico da comunidade Franca no ambiente FiveM, ativa desde 2020. O sistema documenta a evolução da mesma ao longo de suas seis versões de história, detalhando seus líderes, sublíderes, conquistas competitivas (como os títulos da Baguncinha) e os perfis de todos os membros que fizeram parte desta trajetória.
 
 ---
 
