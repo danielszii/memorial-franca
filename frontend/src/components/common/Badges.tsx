@@ -1,6 +1,6 @@
 import React from 'react'
-import { Rank, Member } from '../../types/memorial'
-import { rankColor } from '../../constants/theme'
+import { Rank } from '../../types/memorial'
+import { rankColor, versionColors } from '../../constants/theme'
 
 export function VersionBadge({ v }: { v: string }) {
   return (
@@ -62,5 +62,113 @@ export function StatusDot({ status }: { status?: string }) {
         flexShrink: 0,
       }}
     />
+  )
+}
+
+export function FlameOutlineIcon({
+  size = 16,
+  color = 'currentColor',
+}: {
+  size?: number
+  color?: string
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+    >
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z" />
+    </svg>
+  )
+}
+
+export function FlameFilledIcon({
+  size = 16,
+  color = '#ff4500',
+}: {
+  size?: number
+  color?: string
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={color}
+      stroke={color}
+      strokeWidth="0.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
+    >
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z" />
+    </svg>
+  )
+}
+
+export function CardEraTimeline({ versions = [] }: { versions?: string[] }) {
+  const allVersions = ['1.0', '2.0', '3.0', '4.0', '5.0', '6.0']
+  return (
+    <div className="w-full pt-1">
+      <div className="flex items-center gap-0 w-full">
+        {allVersions.map((v, i) => {
+          const active = versions.includes(v)
+          const c = versionColors[v] || '#ffffff'
+          return (
+            <div key={v} className="flex items-center flex-1">
+              <div
+                style={{
+                  width: '100%',
+                  height: 3,
+                  background: active
+                    ? `linear-gradient(90deg, ${c}90, ${c}50)`
+                    : 'rgba(255,255,255,0.06)',
+                  borderRadius: i === 0 ? '2px 0 0 2px' : i === 5 ? '0 2px 2px 0' : 0,
+                  position: 'relative',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: active ? c : '#1c1c1c',
+                    border: `1px solid ${active ? c : '#333'}`,
+                    boxShadow: active ? `0 0 6px ${c}` : 'none',
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="flex mt-1">
+        {allVersions.map(v => (
+          <div
+            key={v}
+            className="flex-1 text-center"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 9,
+              fontWeight: versions.includes(v) ? 600 : 400,
+              color: versions.includes(v) ? versionColors[v] : '#383838',
+            }}
+          >
+            {v}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }

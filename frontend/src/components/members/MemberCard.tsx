@@ -1,7 +1,7 @@
 import React from 'react'
 import { Member, Rank } from '../../types/memorial'
 import { rankColor } from '../../constants/theme'
-import { RankBadge, VersionBadge } from '../common/Badges'
+import { RankBadge, CardEraTimeline, FlameOutlineIcon, FlameFilledIcon } from '../common/Badges'
 
 interface MemberCardProps {
   member: Member
@@ -55,16 +55,15 @@ export function MemberCard({
   return (
     <div
       onClick={onClick}
-      className={isTopVoted ? 'flame-card-effect' : ''}
       style={{
         background: '#0f0f0f',
         border: isTopVoted
-          ? '1px solid rgba(255,100,0,0.7)'
+          ? '1px solid rgba(255,85,0,0.45)'
           : hasVotedThisMember
-          ? '1px solid rgba(255,140,0,0.45)'
+          ? '1px solid rgba(255,100,0,0.3)'
           : '1px solid rgba(255,255,255,0.07)',
         borderRadius: '6px',
-        padding: '20px',
+        padding: '18px',
         cursor: onClick ? 'pointer' : 'default',
         transition: 'transform 0.18s, border-color 0.18s, box-shadow 0.18s',
         position: 'relative',
@@ -74,28 +73,28 @@ export function MemberCard({
         e.currentTarget.style.transform = 'translateY(-2px)'
         if (!isTopVoted) {
           e.currentTarget.style.borderColor = hasVotedThisMember
-            ? 'rgba(255,140,0,0.7)'
+            ? 'rgba(255,100,0,0.6)'
             : isLegend
             ? 'rgba(201,168,76,0.3)'
             : `${rc}30`
           e.currentTarget.style.boxShadow = hasVotedThisMember
-            ? '0 8px 24px rgba(0,0,0,0.6), 0 0 12px rgba(255,140,0,0.2)'
+            ? '0 6px 18px rgba(0,0,0,0.5)'
             : isLegend
-            ? '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
-            : `0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
+            ? '0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
+            : `0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
         }
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
         if (!isTopVoted) {
           e.currentTarget.style.borderColor = hasVotedThisMember
-            ? 'rgba(255,140,0,0.45)'
+            ? 'rgba(255,100,0,0.3)'
             : 'rgba(255,255,255,0.07)'
           e.currentTarget.style.boxShadow = 'none'
         }
       }}
     >
-      {/* ── Top Bar (Flamejante se for o mais votado) ── */}
+      {/* ── Barra Superior (Gradiente de Chamas no Mais Votado) ── */}
       {isTopVoted ? (
         <div
           className="flame-banner-effect"
@@ -104,7 +103,7 @@ export function MemberCard({
             top: 0,
             left: 0,
             right: 0,
-            height: 3,
+            height: 2.5,
           }}
         />
       ) : isLegend ? (
@@ -142,25 +141,25 @@ export function MemberCard({
             right: 10,
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 3,
+            gap: 4,
             padding: '2px 7px',
             borderRadius: '4px',
-            background: 'linear-gradient(135deg, rgba(255,69,0,0.25), rgba(255,140,0,0.15))',
-            border: '1px solid rgba(255,100,0,0.6)',
-            boxShadow: '0 0 10px rgba(255,69,0,0.35)',
+            background: 'rgba(255,69,0,0.12)',
+            border: '1px solid rgba(255,85,0,0.4)',
             fontFamily: 'var(--font-mono)',
             fontSize: 9,
-            fontWeight: 800,
-            color: '#ff9900',
+            fontWeight: 700,
+            color: '#ff6600',
             letterSpacing: '0.06em',
             userSelect: 'none',
           }}
         >
-          <span>🔥</span>
-          <span className="flame-text-gradient">MAIS VOTADO</span>
+          <FlameFilledIcon size={11} color="#ff5500" />
+          <span>MAIS VOTADO</span>
         </div>
       )}
 
+      {/* ── Header: Avatar + Nick + Discord ── */}
       <div className="flex items-start gap-3 mb-3">
         <div
           style={{
@@ -169,15 +168,14 @@ export function MemberCard({
             flexShrink: 0,
             borderRadius: '4px',
             border: isTopVoted
-              ? '1.5px solid rgba(255,100,0,0.8)'
+              ? '1.5px solid rgba(255,85,0,0.6)'
               : hasVotedThisMember
-              ? '1.5px solid rgba(255,140,0,0.7)'
+              ? '1.5px solid rgba(255,100,0,0.5)'
               : isLegend
               ? '1.5px solid rgba(201,168,76,0.5)'
               : `1.5px solid ${rc}40`,
             overflow: 'hidden',
             background: '#0a0a0a',
-            boxShadow: isTopVoted ? '0 0 10px rgba(255,69,0,0.4)' : 'none',
           }}
         >
           <img src={member.avatar} alt={member.nick} className="w-full h-full object-cover" />
@@ -217,13 +215,14 @@ export function MemberCard({
                   }}
                 />
               ))}
+            {/* O NOME PERMANECE SEMPRE BRANCO (#f5f5f5) */}
             <span
               style={{
                 fontFamily: 'var(--font-display)',
                 fontWeight: 700,
                 fontSize: 16,
                 letterSpacing: '0.06em',
-                color: isTopVoted ? '#ffaa00' : hasVotedThisMember ? '#ff9900' : '#f5f5f5',
+                color: '#f5f5f5',
                 textTransform: 'uppercase',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -250,128 +249,104 @@ export function MemberCard({
       </div>
 
       {/* ── Badges de Ranks Múltiplos ── */}
-      <div className="flex flex-wrap gap-1 mb-3">
+      <div className="flex flex-wrap gap-1 mb-2.5">
         {ranks.map((r, idx) => (
           <RankBadge key={`${r}-${idx}`} rank={r} />
         ))}
       </div>
 
-      <div
-        style={{
-          fontSize: 11,
-          color: '#5a5a5a',
-          marginBottom: 12,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {member.role}
-      </div>
-
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 12 }} />
-
-      {/* ── Rodapé do Card: Versões + Botão Francês da Galera ── */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1">
-          {member.versions?.map(v => (
-            <VersionBadge key={v} v={v} />
-          ))}
+      {/* ── Cargo & Botão de Voto Estilo Like Instagram ── */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div
+          style={{
+            fontSize: 11,
+            color: '#666',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+          }}
+        >
+          {member.role}
         </div>
 
-        {/* Botão / Badge Francês da Galera */}
-        {hasVotedThisMember ? (
-          <div
-            title="Você votou neste integrante no Francês da Galera hoje!"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '3px 8px',
-              borderRadius: '4px',
-              background: 'linear-gradient(135deg, rgba(255,69,0,0.2), rgba(255,140,0,0.1))',
-              border: '1px solid rgba(255,140,0,0.6)',
-              boxShadow: '0 0 10px rgba(255,100,0,0.25)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 10,
-              fontWeight: 700,
-              color: '#ff9900',
-              letterSpacing: '0.04em',
-              userSelect: 'none',
-              flexShrink: 0,
-            }}
-          >
-            <span>🔥 SEU VOTO</span>
-            <span style={{ color: '#fff', opacity: 0.9 }}>({member.respect_count || 0})</span>
-          </div>
-        ) : canVoteMore ? (
-          <button
-            type="button"
-            disabled={isVoting}
-            onClick={e => {
-              e.stopPropagation()
+        {/* Botão de Voto Estilo Instagram */}
+        <button
+          type="button"
+          disabled={isVoting || hasVotedThisMember || !canVoteMore}
+          onClick={e => {
+            e.stopPropagation()
+            if (!hasVotedThisMember && canVoteMore) {
               onVote?.(member.id)
-            }}
-            title={`Votar no Francês da Galera (${votesRemaining} de 5 votos restantes hoje)`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '3px 8px',
-              borderRadius: '4px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 10,
-              fontWeight: 600,
-              color: '#b0b0b0',
-              letterSpacing: '0.04em',
-              cursor: isVoting ? 'wait' : 'pointer',
-              transition: 'all 0.2s',
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(255,69,0,0.18)'
-              e.currentTarget.style.borderColor = 'rgba(255,140,0,0.6)'
-              e.currentTarget.style.color = '#ff9900'
-              e.currentTarget.style.transform = 'scale(1.03)'
-              e.currentTarget.style.boxShadow = '0 0 10px rgba(255,69,0,0.3)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
-              e.currentTarget.style.color = '#b0b0b0'
+            }
+          }}
+          title={
+            hasVotedThisMember
+              ? 'Você já votou neste membro hoje!'
+              : canVoteMore
+              ? `Votar no Francês da Galera (${votesRemaining} de 5 votos restantes)`
+              : 'Você já utilizou seus 5 votos hoje.'
+          }
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 5,
+            padding: '4px 8px',
+            borderRadius: '4px',
+            background: hasVotedThisMember
+              ? 'rgba(255,69,0,0.12)'
+              : 'rgba(255,255,255,0.03)',
+            border: hasVotedThisMember
+              ? '1px solid rgba(255,85,0,0.4)'
+              : '1px solid rgba(255,255,255,0.08)',
+            cursor: hasVotedThisMember || !canVoteMore ? 'default' : 'pointer',
+            transition: 'all 0.15s ease-in-out',
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => {
+            if (!hasVotedThisMember && canVoteMore) {
+              e.currentTarget.style.background = 'rgba(255,69,0,0.1)'
+              e.currentTarget.style.borderColor = 'rgba(255,85,0,0.35)'
+              e.currentTarget.style.transform = 'scale(1.05)'
+            }
+          }}
+          onMouseLeave={e => {
+            if (!hasVotedThisMember && canVoteMore) {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
               e.currentTarget.style.transform = 'scale(1)'
-              e.currentTarget.style.boxShadow = 'none'
-            }}
-          >
-            <span>🔥 VOTAR</span>
-            <span style={{ color: '#777' }}>({member.respect_count || 0})</span>
-          </button>
-        ) : (
-          <div
-            title="Total de votos no Francês da Galera"
+            }
+          }}
+        >
+          {hasVotedThisMember ? (
+            <FlameFilledIcon size={15} color="#ff4500" />
+          ) : (
+            <FlameOutlineIcon
+              size={15}
+              color={canVoteMore ? '#999999' : '#444444'}
+            />
+          )}
+          <span
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '3px 8px',
-              borderRadius: '4px',
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
-              color: '#666',
-              letterSpacing: '0.04em',
-              userSelect: 'none',
-              flexShrink: 0,
+              fontSize: 11,
+              fontWeight: 600,
+              color: hasVotedThisMember
+                ? '#ff5500'
+                : canVoteMore
+                ? '#b0b0b0'
+                : '#555555',
             }}
           >
-            <span>🔥</span>
-            <span>({member.respect_count || 0})</span>
-          </div>
-        )}
+            {member.respect_count || 0}
+          </span>
+        </button>
       </div>
+
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
+
+      {/* ── Linha do Tempo Horizontal das Eras na Base do Card ── */}
+      <CardEraTimeline versions={member.versions} />
     </div>
   )
 }
