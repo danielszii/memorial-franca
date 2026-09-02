@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Member, Rank } from '../../types/memorial'
 import { rankColor } from '../../constants/theme'
-import { RankBadge, FlameOutlineIcon, FlameFilledIcon, MovingFlamesCrest } from '../common/Badges'
+import { RankBadge, FlameOutlineIcon, FlameFilledIcon, PixelArtFlames } from '../common/Badges'
 
 interface MemberCardProps {
   member: Member
@@ -57,11 +57,10 @@ export function MemberCard({
   return (
     <div
       onClick={onClick}
-      className={isTopVoted ? 'flame-moving-card' : ''}
       style={{
         background: '#0f0f0f',
         border: isTopVoted
-          ? '1px solid rgba(255,85,0,0.6)'
+          ? '1.5px solid #d81a00'
           : hasVotedThisMember
           ? '1px solid rgba(255,100,0,0.35)'
           : '1px solid rgba(255,255,255,0.07)',
@@ -97,8 +96,8 @@ export function MemberCard({
         }
       }}
     >
-      {/* ── Chamas Animadas em Movimento Real (Apenas para o Mais Votado) ── */}
-      {isTopVoted && <MovingFlamesCrest />}
+      {/* ── Chamas Animadas em Pixel Art (Apenas para o Mais Votado) ── */}
+      {isTopVoted && <PixelArtFlames />}
 
       {/* ── Barra Superior de Acento ── */}
       {isTopVoted ? (
