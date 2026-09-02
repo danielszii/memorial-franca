@@ -873,7 +873,7 @@ export default function App() {
                 letterSpacing: '0.08em',
               }}
             >
-              © 2024 FACÇÃO FRANÇA — TODOS OS DIREITOS RESERVADOS
+              © 2024 MEMORIAL FRANÇA — TODOS OS DIREITOS RESERVADOS
             </span>
             <button
               type="button"

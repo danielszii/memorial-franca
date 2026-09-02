@@ -24,7 +24,7 @@ const titlesData: Championship[] = [
     date: '2022',
     bannerImage: '/Banner TROFÉU BGC.png',
     description:
-      'Conquista histórica que consolidou a hegemonia absoluta da facção. Domínio tático de ponta a ponta e consagração do elenco no cenário mais competitivo.',
+      'Conquista histórica que consolidou a hegemonia absoluta da França. Domínio tático de ponta a ponta e consagração do elenco no cenário mais competitivo.',
     stats: [
       { label: 'CLASSIFICAÇÃO', value: '1º LUGAR' },
       { label: 'ERA', value: '3.0' },
