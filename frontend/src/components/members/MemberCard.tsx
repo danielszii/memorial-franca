@@ -95,9 +95,13 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
           <div className="flex items-center gap-1.5 mb-1 min-w-0 w-full">
             {hasStream && (
               member.is_live ? (
-                <span
+                <a
+                  href={member.live_url || defaultStreamUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={e => e.stopPropagation()}
                   className="live-indicator-dot-green"
-                  title="AO VIVO"
+                  title="AO VIVO — Clique para assistir"
                   style={{
                     width: '8px',
                     height: '8px',
@@ -105,6 +109,8 @@ export function MemberCard({ member, onClick }: MemberCardProps) {
                     backgroundColor: '#10b981',
                     display: 'inline-block',
                     flexShrink: 0,
+                    cursor: 'pointer',
+                    boxShadow: '0 0 6px rgba(16, 185, 129, 0.8)',
                   }}
                 />
               ) : (

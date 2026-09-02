@@ -121,10 +121,23 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
                 >
                   {member.nick.toUpperCase()}
                 </h2>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 items-center">
                   {ranks.map((r, idx) => (
                     <RankBadge key={`${r}-${idx}`} rank={r} />
                   ))}
+                  {member.is_live && (
+                    <a
+                      href={member.live_url || (member.kick ? (member.kick.startsWith('http') ? member.kick : `https://kick.com/${member.kick}`) : member.twitch ? (member.twitch.startsWith('http') ? member.twitch : `https://twitch.tv/${member.twitch}`) : '#')}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 transition-all"
+                      style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em' }}
+                      title="Clique para assistir à live"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      AO VIVO AGORA
+                    </a>
+                  )}
                 </div>
               </div>
               <div

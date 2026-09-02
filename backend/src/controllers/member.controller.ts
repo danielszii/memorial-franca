@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { MemberService } from '../services/member.service'
+import { LiveSyncService } from '../services/live-sync.service'
 import { AppError } from '../errors/app.error'
 
 export class MemberController {
@@ -29,6 +30,15 @@ export class MemberController {
 
       const member = await this.memberService.getMemberById(id)
       res.status(200).json(member)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  syncLives = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const result = await LiveSyncService.sync()
+      res.status(200).json(result)
     } catch (error) {
       next(error)
     }

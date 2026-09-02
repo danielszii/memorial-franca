@@ -19,6 +19,9 @@ router.get('/eras/:version', eraController.getByVersion)
 router.get('/members', memberController.getAll)
 router.get('/members/:id', memberController.getById)
 
+// Sincronização manual/webhook de lives
+router.get('/sync-lives', memberController.syncLives)
+
 // Presença em tempo real (visitantes online)
 router.get('/online', presenceController.getOnline)
 

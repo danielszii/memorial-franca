@@ -1,5 +1,12 @@
 import pool from '../config/database'
 
+export interface LiveSyncResult {
+  success: boolean
+  detectedCount: number
+  liveMembers: Array<{ id: number; url: string; platform: string }>
+  durationMs: number
+}
+
 export class LiveSyncService {
   private static intervalId: NodeJS.Timeout | null = null
   private static isRunning = false
@@ -14,7 +21,7 @@ export class LiveSyncService {
       const userPart = parts[parts.length - 1]
       return userPart.split('/')[0].split('?')[0].trim().toLowerCase()
     }
-    return cleaned.toLowerCase()
+    return cleaned.replace(/^@/, '').toLowerCase()
   }
 
   private static extractKickUsername(kickValue: string | null | undefined): string | null {
@@ -25,7 +32,7 @@ export class LiveSyncService {
       const userPart = parts[parts.length - 1]
       return userPart.split('/')[0].split('?')[0].trim().toLowerCase()
     }
-    return cleaned.toLowerCase()
+    return cleaned.replace(/^@/, '').toLowerCase()
   }
 
   private static extractYoutubeHandle(ytValue: string | null | undefined): string | null {
@@ -60,6 +67,7 @@ export class LiveSyncService {
         client_secret: clientSecret,
         grant_type: 'client_credentials',
       }),
+      signal: AbortSignal.timeout(6000),
     })
 
     if (!response.ok) {
@@ -76,20 +84,21 @@ export class LiveSyncService {
 
   private static async checkKickLive(username: string): Promise<boolean> {
     try {
-      const url = `https://kick.com/api/v1/channels/${username}`
+      const url = `https://kick.com/api/v2/channels/${encodeURIComponent(username)}`
       const res = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'application/json'
-        }
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+        signal: AbortSignal.timeout(5000),
       })
-      if (res.status === 403) {
-        return false // Bloqueado por Cloudflare
-      }
       if (!res.ok) return false
-      const data = (await res.json()) as { livestream?: { id: number; is_live: boolean } | null }
-      return !!data.livestream
-    } catch (err) {
+      const data = (await res.json()) as {
+        is_banned?: boolean
+        livestream?: { id: number; session_title?: string } | null
+      }
+      return !data.is_banned && !!data.livestream
+    } catch {
       return false
     }
   }
@@ -100,34 +109,38 @@ export class LiveSyncService {
       const url = `https://www.youtube.com/${path}/live`
       const res = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept-Language': 'en-US,en;q=0.9',
+        },
+        signal: AbortSignal.timeout(5000),
       })
       if (!res.ok) return false
       const html = await res.text()
-      return html.includes('"isLive":true') || html.includes('"isLivePlayable":true')
-    } catch (err) {
+      return html.includes('"isLive":true') || html.includes('"isLivePlayable":true') || html.includes('"status":"LIVE"')
+    } catch {
       return false
     }
   }
 
-  public static async sync(): Promise<void> {
+  public static async sync(): Promise<LiveSyncResult> {
     if (this.isRunning) {
       console.log('[Live Sync] A sincronização anterior ainda está rodando. Pulando esta rodada.')
-      return
+      return { success: false, detectedCount: 0, liveMembers: [], durationMs: 0 }
     }
 
+    const startTime = Date.now()
     this.isRunning = true
 
     try {
       // 1. Busca todos os membros com pelo menos um canal configurado
       const { rows: members } = await pool.query<{
         id: number
+        nick: string
         twitch: string | null
         youtube: string | null
         kick: string | null
       }>(
-        `SELECT id, twitch, youtube, kick 
+        `SELECT id, nick, twitch, youtube, kick 
          FROM members 
          WHERE (twitch IS NOT NULL AND twitch != '') 
             OR (youtube IS NOT NULL AND youtube != '') 
@@ -137,14 +150,14 @@ export class LiveSyncService {
       if (members.length === 0) {
         await pool.query('UPDATE members SET is_live = FALSE, live_url = NULL WHERE is_live = TRUE;')
         this.isRunning = false
-        return
+        return { success: true, detectedCount: 0, liveMembers: [], durationMs: Date.now() - startTime }
       }
 
-      // Mapeamento de memberId -> link ativo se estiver ao vivo
-      const liveMemberUrls = new Map<number, string>()
+      // Mapeamento de memberId -> { url, platform } se estiver ao vivo
+      const liveMemberMap = new Map<number, { url: string; platform: string; nick: string }>()
 
       // ─────────────────────────────────────────────────────────────────
-      // A. CHECAGEM DA TWITCH (Em lote se as credenciais existirem)
+      // A. CHECAGEM DA TWITCH (Oficial Helix ou Fallback GraphQL)
       // ─────────────────────────────────────────────────────────────────
       const twitchClientId = process.env.TWITCH_CLIENT_ID
       const twitchClientSecret = process.env.TWITCH_CLIENT_SECRET
@@ -153,17 +166,17 @@ export class LiveSyncService {
         try {
           const twitchMembers = members.filter(m => m.twitch && m.twitch.trim() !== '')
           if (twitchMembers.length > 0) {
-            const twitchUsernameToIdsMap = new Map<string, number[]>()
+            const twitchUsernameToMembersMap = new Map<string, typeof twitchMembers>()
             for (const m of twitchMembers) {
               const username = this.extractUsername(m.twitch)
               if (username) {
-                const list = twitchUsernameToIdsMap.get(username) || []
-                list.push(m.id)
-                twitchUsernameToIdsMap.set(username, list)
+                const list = twitchUsernameToMembersMap.get(username) || []
+                list.push(m)
+                twitchUsernameToMembersMap.set(username, list)
               }
             }
 
-            const allTwitchUsernames = Array.from(twitchUsernameToIdsMap.keys())
+            const allTwitchUsernames = Array.from(twitchUsernameToMembersMap.keys())
             const twitchToken = await this.getAppAccessToken(twitchClientId, twitchClientSecret)
             const batchSize = 100
 
@@ -181,6 +194,7 @@ export class LiveSyncService {
                   'Client-ID': twitchClientId,
                   'Authorization': `Bearer ${twitchToken}`,
                 },
+                signal: AbortSignal.timeout(6000),
               })
 
               if (response.ok) {
@@ -188,10 +202,14 @@ export class LiveSyncService {
                 for (const stream of body.data) {
                   if (stream.type === 'live') {
                     const usernameLower = stream.user_login.toLowerCase()
-                    const ids = twitchUsernameToIdsMap.get(usernameLower)
-                    if (ids) {
-                      for (const id of ids) {
-                        liveMemberUrls.set(id, `https://twitch.tv/${usernameLower}`)
+                    const matchedMembers = twitchUsernameToMembersMap.get(usernameLower)
+                    if (matchedMembers) {
+                      for (const m of matchedMembers) {
+                        liveMemberMap.set(m.id, {
+                          url: `https://twitch.tv/${usernameLower}`,
+                          platform: 'Twitch',
+                          nick: m.nick,
+                        })
                       }
                     }
                   }
@@ -200,62 +218,66 @@ export class LiveSyncService {
             }
           }
         } catch (err) {
-          console.error('[Live Sync] Erro ao sincronizar Twitch:', err)
+          console.error('[Live Sync] Erro ao sincronizar Twitch (Helix):', err)
         }
       } else {
         // Fallback: usar GraphQL da Twitch (não requer credenciais do desenvolvedor)
         try {
-          console.log('[Live Sync] Twitch API Credentials não configuradas. Usando GQL Fallback...')
           const twitchMembers = members.filter(m => m.twitch && m.twitch.trim() !== '')
           if (twitchMembers.length > 0) {
-            const twitchUsernameToIdsMap = new Map<string, number[]>()
+            const twitchUsernameToMembersMap = new Map<string, typeof twitchMembers>()
             for (const m of twitchMembers) {
               const username = this.extractUsername(m.twitch)
               if (username) {
-                const list = twitchUsernameToIdsMap.get(username) || []
-                list.push(m.id)
-                twitchUsernameToIdsMap.set(username, list)
+                const list = twitchUsernameToMembersMap.get(username) || []
+                list.push(m)
+                twitchUsernameToMembersMap.set(username, list)
               }
             }
 
-            const allTwitchUsernames = Array.from(twitchUsernameToIdsMap.keys())
-            const batchSize = 25 // Limite amigável de lotes para GQL
+            const allTwitchUsernames = Array.from(twitchUsernameToMembersMap.keys())
+            const batchSize = 25
 
             for (let i = 0; i < allTwitchUsernames.length; i += batchSize) {
               const batch = allTwitchUsernames.slice(i, i + batchSize)
-              const body = batch.map((username) => ({
+              const body = batch.map(username => ({
                 operationName: 'StreamRefetch',
                 variables: {
-                  channel: username
+                  channel: username,
                 },
-                query: 'query StreamRefetch($channel: String!) { user(login: $channel) { stream { id type } } }'
+                query: 'query StreamRefetch($channel: String!) { user(login: $channel) { stream { id type } } }',
               }))
 
               const response = await fetch('https://gql.twitch.tv/gql', {
                 method: 'POST',
                 headers: {
                   'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko',
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(6000),
               })
 
               if (response.ok) {
-                const data = (await response.json()) as Array<{ data?: { user?: { stream?: { id: string; type: string } | null } | null } }>
+                const data = (await response.json()) as Array<{
+                  data?: { user?: { stream?: { id: string; type: string } | null } | null }
+                }>
                 data.forEach((item, index) => {
                   const stream = item?.data?.user?.stream
                   if (stream && stream.type === 'live') {
                     const usernameLower = batch[index].toLowerCase()
-                    const ids = twitchUsernameToIdsMap.get(usernameLower)
-                    if (ids) {
-                      for (const id of ids) {
-                        liveMemberUrls.set(id, `https://twitch.tv/${usernameLower}`)
+                    const matchedMembers = twitchUsernameToMembersMap.get(usernameLower)
+                    if (matchedMembers) {
+                      for (const m of matchedMembers) {
+                        liveMemberMap.set(m.id, {
+                          url: `https://twitch.tv/${usernameLower}`,
+                          platform: 'Twitch',
+                          nick: m.nick,
+                        })
                       }
                     }
                   }
                 })
-              } else {
-                console.error(`[Live Sync] Falha ao consultar Twitch GQL. Status: ${response.status}`)
               }
             }
           }
@@ -265,25 +287,37 @@ export class LiveSyncService {
       }
 
       // ─────────────────────────────────────────────────────────────────
-      // B. CHECAGEM DO KICK (Um a um em paralelo)
+      // B. CHECAGEM DO KICK (Lotes controlados com pausa para evitar 429)
       // ─────────────────────────────────────────────────────────────────
       const kickMembers = members.filter(m => m.kick && m.kick.trim() !== '')
       if (kickMembers.length > 0) {
-        await Promise.all(
-          kickMembers.map(async m => {
-            const username = this.extractKickUsername(m.kick)
-            if (username) {
-              const isLive = await this.checkKickLive(username)
-              if (isLive) {
-                liveMemberUrls.set(m.id, `https://kick.com/${username}`)
+        const batchSize = 5
+        for (let i = 0; i < kickMembers.length; i += batchSize) {
+          const batch = kickMembers.slice(i, i + batchSize)
+          await Promise.all(
+            batch.map(async m => {
+              const username = this.extractKickUsername(m.kick)
+              if (username) {
+                const isLive = await this.checkKickLive(username)
+                if (isLive) {
+                  liveMemberMap.set(m.id, {
+                    url: `https://kick.com/${username}`,
+                    platform: 'Kick',
+                    nick: m.nick,
+                  })
+                }
               }
-            }
-          })
-        )
+            })
+          )
+          // Pequena pausa entre lotes para não estressar a conexão
+          if (i + batchSize < kickMembers.length) {
+            await new Promise(res => setTimeout(res, 100))
+          }
+        }
       }
 
       // ─────────────────────────────────────────────────────────────────
-      // C. CHECAGEM DO YOUTUBE (Um a um em paralelo)
+      // C. CHECAGEM DO YOUTUBE
       // ─────────────────────────────────────────────────────────────────
       const youtubeMembers = members.filter(m => m.youtube && m.youtube.trim() !== '')
       if (youtubeMembers.length > 0) {
@@ -294,7 +328,11 @@ export class LiveSyncService {
               const isLive = await this.checkYoutubeLive(handle)
               if (isLive) {
                 const path = handle.startsWith('@') || handle.includes('/') ? handle : `@${handle}`
-                liveMemberUrls.set(m.id, `https://youtube.com/${path}/live`)
+                liveMemberMap.set(m.id, {
+                  url: `https://youtube.com/${path}/live`,
+                  platform: 'YouTube',
+                  nick: m.nick,
+                })
               }
             }
           })
@@ -312,26 +350,46 @@ export class LiveSyncService {
         await client.query('UPDATE members SET is_live = FALSE, live_url = NULL WHERE is_live = TRUE;')
 
         // Define os novos que estão online
-        if (liveMemberUrls.size > 0) {
-          for (const [id, url] of liveMemberUrls.entries()) {
+        if (liveMemberMap.size > 0) {
+          for (const [id, liveInfo] of liveMemberMap.entries()) {
             await client.query(
               'UPDATE members SET is_live = TRUE, live_url = $1 WHERE id = $2;',
-              [url, id]
+              [liveInfo.url, id]
             )
           }
         }
 
         await client.query('COMMIT')
-        console.log(`[Live Sync] Sincronização concluída. Membros em live detectados: ${liveMemberUrls.size}`)
+        const duration = Date.now() - startTime
+        console.log(
+          `[Live Sync] Sincronização concluída em ${duration}ms. Membros em live detectados: ${liveMemberMap.size}`
+        )
+        if (liveMemberMap.size > 0) {
+          const names = Array.from(liveMemberMap.values())
+            .map(item => `${item.nick} (${item.platform})`)
+            .join(', ')
+          console.log(`[Live Sync] Ao vivo: ${names}`)
+        }
+
+        return {
+          success: true,
+          detectedCount: liveMemberMap.size,
+          liveMembers: Array.from(liveMemberMap.entries()).map(([id, info]) => ({
+            id,
+            url: info.url,
+            platform: info.platform,
+          })),
+          durationMs: duration,
+        }
       } catch (err) {
         await client.query('ROLLBACK')
         throw err
       } finally {
         client.release()
       }
-
     } catch (error) {
       console.error('[Live Sync] Erro geral na rotina de sincronização:', error)
+      return { success: false, detectedCount: 0, liveMembers: [], durationMs: Date.now() - startTime }
     } finally {
       this.isRunning = false
     }
@@ -343,14 +401,14 @@ export class LiveSyncService {
     }
 
     console.log(`[Live Sync] Iniciando sincronização periódica de lives (a cada ${intervalMs / 1000}s)...`)
-    
+
     // Executa primeira vez após 5s
     setTimeout(() => {
-      this.sync()
+      this.sync().catch(err => console.error('[Live Sync] Erro na execução inicial:', err))
     }, 5000)
 
     this.intervalId = setInterval(() => {
-      this.sync()
+      this.sync().catch(err => console.error('[Live Sync] Erro na execução periódica:', err))
     }, intervalMs)
   }
 
