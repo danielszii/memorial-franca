@@ -329,7 +329,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
             </div>
           )}
 
-          {/* ERAS PARTICIPADAS */}
+          {/* FRANÇAS PARTICIPADAS */}
           <div className="mt-4">
             <div
               style={{
@@ -340,7 +340,7 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
                 marginBottom: 10,
               }}
             >
-              ERAS PARTICIPADAS
+              FRANÇAS PARTICIPADAS
             </div>
             <div className="flex items-center gap-0">
               {['1.0', '2.0', '3.0', '4.0', '5.0', '6.0'].map((v, i) => {
