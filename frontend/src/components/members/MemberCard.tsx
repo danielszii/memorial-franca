@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Member, Rank } from '../../types/memorial'
 import { rankColor } from '../../constants/theme'
-import { RankBadge, FlameOutlineIcon, FlameFilledIcon, PixelArtFlames } from '../common/Badges'
+import { RankBadge, FlameOutlineIcon, FlameFilledIcon } from '../common/Badges'
 
 interface MemberCardProps {
   member: Member
@@ -17,7 +17,6 @@ interface MemberCardProps {
 export function MemberCard({
   member,
   onClick,
-  isTopVoted = false,
   hasVotedThisMember = false,
   canVoteMore = true,
   votesRemaining = 5,
@@ -59,9 +58,7 @@ export function MemberCard({
       onClick={onClick}
       style={{
         background: '#0f0f0f',
-        border: isTopVoted
-          ? '1.5px solid #d81a00'
-          : hasVotedThisMember
+        border: hasVotedThisMember
           ? '1px solid rgba(255,100,0,0.35)'
           : '1px solid rgba(255,255,255,0.07)',
         borderRadius: '6px',
@@ -69,50 +66,31 @@ export function MemberCard({
         cursor: onClick ? 'pointer' : 'default',
         transition: 'transform 0.18s, border-color 0.18s, box-shadow 0.18s',
         position: 'relative',
-        overflow: isTopVoted ? 'visible' : 'hidden',
+        overflow: 'hidden',
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-2px)'
-        if (!isTopVoted) {
-          e.currentTarget.style.borderColor = hasVotedThisMember
-            ? 'rgba(255,100,0,0.6)'
-            : isLegend
-            ? 'rgba(201,168,76,0.3)'
-            : `${rc}30`
-          e.currentTarget.style.boxShadow = hasVotedThisMember
-            ? '0 6px 18px rgba(0,0,0,0.5)'
-            : isLegend
-            ? '0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
-            : `0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
-        }
+        e.currentTarget.style.borderColor = hasVotedThisMember
+          ? 'rgba(255,100,0,0.6)'
+          : isLegend
+          ? 'rgba(201,168,76,0.3)'
+          : `${rc}30`
+        e.currentTarget.style.boxShadow = hasVotedThisMember
+          ? '0 6px 18px rgba(0,0,0,0.5)'
+          : isLegend
+          ? '0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
+          : `0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        if (!isTopVoted) {
-          e.currentTarget.style.borderColor = hasVotedThisMember
-            ? 'rgba(255,100,0,0.35)'
-            : 'rgba(255,255,255,0.07)'
-          e.currentTarget.style.boxShadow = 'none'
-        }
+        e.currentTarget.style.borderColor = hasVotedThisMember
+          ? 'rgba(255,100,0,0.35)'
+          : 'rgba(255,255,255,0.07)'
+        e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* ── Chamas Animadas em Pixel Art (Apenas para o Mais Votado) ── */}
-      {isTopVoted && <PixelArtFlames />}
-
-      {/* ── Barra Superior de Acento ── */}
-      {isTopVoted ? (
-        <div
-          className="flame-banner-effect"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 2.5,
-            borderRadius: '6px 6px 0 0',
-          }}
-        />
-      ) : isLegend ? (
+      {/* ── Barra Superior Padrão de Acento ── */}
+      {isLegend ? (
         <div
           style={{
             position: 'absolute',
@@ -149,9 +127,7 @@ export function MemberCard({
               height: 44,
               flexShrink: 0,
               borderRadius: '4px',
-              border: isTopVoted
-                ? '1.5px solid rgba(255,85,0,0.6)'
-                : hasVotedThisMember
+              border: hasVotedThisMember
                 ? '1.5px solid rgba(255,100,0,0.5)'
                 : isLegend
                 ? '1.5px solid rgba(201,168,76,0.5)'
@@ -198,7 +174,7 @@ export function MemberCard({
                     }}
                   />
                 ))}
-              {/* O NOME PERMANECE SEMPRE BRANCO (#f5f5f5) */}
+              {/* NOME SEMPRE BRANCO (#f5f5f5) */}
               <span
                 style={{
                   fontFamily: 'var(--font-display)',
@@ -265,10 +241,10 @@ export function MemberCard({
             }}
           >
             {hasVotedThisMember ? (
-              <FlameFilledIcon size={17} color="#ff4500" />
+              <FlameFilledIcon size={18} color="#ff4500" />
             ) : (
               <FlameOutlineIcon
-                size={17}
+                size={18}
                 color={
                   isBtnHovered && canVoteMore
                     ? '#ff5500'
@@ -297,7 +273,7 @@ export function MemberCard({
             </span>
           </button>
 
-          {/* Tooltip ao passar o mouse: "Votar" */}
+          {/* Tooltip ao passar o mouse: "VOTAR" */}
           {isBtnHovered && canVoteMore && !hasVotedThisMember && (
             <div
               style={{
