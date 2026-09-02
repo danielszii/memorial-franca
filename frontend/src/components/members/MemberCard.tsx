@@ -1,7 +1,7 @@
 import React from 'react'
 import { Member, Rank } from '../../types/memorial'
 import { rankColor } from '../../constants/theme'
-import { RankBadge, CardEraTimeline, FlameOutlineIcon, FlameFilledIcon } from '../common/Badges'
+import { RankBadge, FlameOutlineIcon, FlameFilledIcon } from '../common/Badges'
 
 interface MemberCardProps {
   member: Member
@@ -256,7 +256,7 @@ export function MemberCard({
       </div>
 
       {/* ── Cargo & Botão de Voto Estilo Like Instagram ── */}
-      <div className="flex items-center justify-between gap-2 mb-3">
+      <div className="flex items-center justify-between gap-2">
         <div
           style={{
             fontSize: 11,
@@ -342,11 +342,6 @@ export function MemberCard({
           </span>
         </button>
       </div>
-
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
-
-      {/* ── Linha do Tempo Horizontal das Eras na Base do Card ── */}
-      <CardEraTimeline versions={member.versions} />
     </div>
   )
 }
