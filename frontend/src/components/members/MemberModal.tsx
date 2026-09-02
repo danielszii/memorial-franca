@@ -1,7 +1,7 @@
 import React from 'react'
 import { Member, Rank } from '../../types/memorial'
 import { rankColor, versionColors } from '../../constants/theme'
-import { RankBadge, StatusDot } from '../common/Badges'
+import { RankBadge } from '../common/Badges'
 
 // Ícones de redes sociais carregados da biblioteca logos.lndev.me
 const Icons = {
@@ -43,15 +43,19 @@ const Icons = {
 export function MemberModal({
   member,
   onClose,
-  canVoteToday = true,
-  hasVotedMemberId = null,
+  isTopVoted = false,
+  hasVotedThisMember = false,
+  canVoteMore = true,
+  votesRemaining = 5,
   isVoting = false,
   onVote,
 }: {
   member: Member
   onClose: () => void
-  canVoteToday?: boolean
-  hasVotedMemberId?: number | null
+  isTopVoted?: boolean
+  hasVotedThisMember?: boolean
+  canVoteMore?: boolean
+  votesRemaining?: number
   isVoting?: boolean
   onVote?: (memberId: number) => Promise<void>
 }) {
@@ -61,7 +65,6 @@ export function MemberModal({
   const primaryRank = (ranks[0] || 'Membro') as Rank
   const rc = (rankColor as Record<string, string>)[primaryRank] || '#4a5568'
   const isLegend = member.id === 1 || member.id === 8
-  const isUserCraque = hasVotedMemberId === member.id
 
   // Busca campos em todos os padrões possíveis
   const m = member as any
@@ -85,16 +88,30 @@ export function MemberModal({
         className="relative w-full max-w-lg"
         style={{
           background: '#111',
-          border: isLegend ? '1px solid rgba(201,168,76,0.25)' : `1px solid ${rc}30`,
+          border: isTopVoted
+            ? '1px solid rgba(255,100,0,0.7)'
+            : isLegend
+            ? '1px solid rgba(201,168,76,0.25)'
+            : `1px solid ${rc}30`,
           borderRadius: '8px',
-          boxShadow: isLegend
+          boxShadow: isTopVoted
+            ? '0 0 45px rgba(255,69,0,0.3), 0 24px 48px rgba(0,0,0,0.85)'
+            : isLegend
             ? '0 0 40px rgba(201,168,76,0.12), 0 24px 48px rgba(0,0,0,0.8)'
             : `0 0 60px ${rc}15, 0 24px 48px rgba(0,0,0,0.8)`,
           overflow: 'hidden',
         }}
         onClick={e => e.stopPropagation()}
       >
-        {isLegend ? (
+        {/* ── Top Bar ── */}
+        {isTopVoted ? (
+          <div
+            className="flame-banner-effect"
+            style={{
+              height: 3,
+            }}
+          />
+        ) : isLegend ? (
           <div
             style={{
               height: 2,
@@ -113,7 +130,12 @@ export function MemberModal({
                 width: 72,
                 height: 72,
                 borderRadius: '6px',
-                border: isLegend ? '2px solid rgba(201,168,76,0.6)' : `2px solid ${rc}50`,
+                border: isTopVoted
+                  ? '2px solid rgba(255,100,0,0.8)'
+                  : isLegend
+                  ? '2px solid rgba(201,168,76,0.6)'
+                  : `2px solid ${rc}50`,
+                boxShadow: isTopVoted ? '0 0 12px rgba(255,69,0,0.5)' : 'none',
                 overflow: 'hidden',
                 background: '#0a0a0a',
                 flexShrink: 0,
@@ -129,7 +151,7 @@ export function MemberModal({
                     fontSize: '24px',
                     fontWeight: 700,
                     letterSpacing: '0.05em',
-                    color: '#f5f5f5',
+                    color: isTopVoted ? '#ffaa00' : '#f5f5f5',
                     lineHeight: 1,
                   }}
                 >
@@ -137,7 +159,18 @@ export function MemberModal({
                 </h2>
                 {member.is_live && (
                   <a
-                    href={member.live_url || (member.kick ? (member.kick.startsWith('http') ? member.kick : `https://kick.com/${member.kick}`) : member.twitch ? (member.twitch.startsWith('http') ? member.twitch : `https://twitch.tv/${member.twitch}`) : '#')}
+                    href={
+                      member.live_url ||
+                      (member.kick
+                        ? member.kick.startsWith('http')
+                          ? member.kick
+                          : `https://kick.com/${member.kick}`
+                        : member.twitch
+                        ? member.twitch.startsWith('http')
+                          ? member.twitch
+                          : `https://twitch.tv/${member.twitch}`
+                        : '#')
+                    }
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 transition-all"
@@ -147,6 +180,20 @@ export function MemberModal({
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     AO VIVO
                   </a>
+                )}
+                {isTopVoted && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 10,
+                      background: 'rgba(255,69,0,0.2)',
+                      border: '1px solid rgba(255,100,0,0.6)',
+                      color: '#ff9900',
+                    }}
+                  >
+                    🔥 MAIS VOTADO
+                  </span>
                 )}
               </div>
               <div
@@ -175,7 +222,7 @@ export function MemberModal({
 
           <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
 
-          {/* ── Grid adaptado (Sem seção Status) ── */}
+          {/* ── Grid Principal (Redes Sociais + Francês da Galera) ── */}
           <div className="grid grid-cols-2 gap-3 mb-5">
             {/* 1. REDES SOCIAIS COM ÍCONES */}
             <div
@@ -203,7 +250,11 @@ export function MemberModal({
                   <>
                     {socials.instagram && (
                       <a
-                        href={socials.instagram.startsWith('http') ? socials.instagram : `https://instagram.com/${socials.instagram.replace('@', '')}`}
+                        href={
+                          socials.instagram.startsWith('http')
+                            ? socials.instagram
+                            : `https://instagram.com/${socials.instagram.replace('@', '')}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         title="Instagram"
@@ -214,7 +265,11 @@ export function MemberModal({
                     )}
                     {socials.twitch && (
                       <a
-                        href={socials.twitch.startsWith('http') ? socials.twitch : `https://twitch.tv/${socials.twitch}`}
+                        href={
+                          socials.twitch.startsWith('http')
+                            ? socials.twitch
+                            : `https://twitch.tv/${socials.twitch}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         title="Twitch"
@@ -225,7 +280,11 @@ export function MemberModal({
                     )}
                     {socials.kick && (
                       <a
-                        href={socials.kick.startsWith('http') ? socials.kick : `https://kick.com/${socials.kick}`}
+                        href={
+                          socials.kick.startsWith('http')
+                            ? socials.kick
+                            : `https://kick.com/${socials.kick}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         title="Kick"
@@ -236,7 +295,11 @@ export function MemberModal({
                     )}
                     {socials.youtube && (
                       <a
-                        href={socials.youtube.startsWith('http') ? socials.youtube : `https://youtube.com/@${socials.youtube}`}
+                        href={
+                          socials.youtube.startsWith('http')
+                            ? socials.youtube
+                            : `https://youtube.com/@${socials.youtube}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         title="YouTube"
@@ -247,7 +310,11 @@ export function MemberModal({
                     )}
                     {socials.tiktok && (
                       <a
-                        href={socials.tiktok.startsWith('http') ? socials.tiktok : `https://tiktok.com/@${socials.tiktok.replace('@', '')}`}
+                        href={
+                          socials.tiktok.startsWith('http')
+                            ? socials.tiktok
+                            : `https://tiktok.com/@${socials.tiktok.replace('@', '')}`
+                        }
                         target="_blank"
                         rel="noreferrer"
                         title="TikTok"
@@ -265,65 +332,19 @@ export function MemberModal({
               </div>
             </div>
 
-            {/* 3. CARGO */}
-            <div
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: '4px',
-                padding: '10px 12px',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10,
-                  color: '#4a4a4a',
-                  letterSpacing: '0.08em',
-                  marginBottom: 4,
-                }}
-              >
-                CARGO
-              </div>
-              <div style={{ fontSize: 13, color: '#d4d4d4', fontWeight: 500 }}>
-                {member.role || 'Membro'}
-              </div>
-            </div>
-
-            {/* 4. ERAS */}
-            <div
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: '4px',
-                padding: '10px 12px',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10,
-                  color: '#4a4a4a',
-                  letterSpacing: '0.08em',
-                  marginBottom: 4,
-                }}
-              >
-                ERAS
-              </div>
-              <div style={{ fontSize: 13, color: '#d4d4d4', fontWeight: 500 }}>
-                {member.versions?.length || 0} versões
-              </div>
-            </div>
-
-            {/* 5. CRAQUE DA GALERA */}
+            {/* 2. FRANCÊS DA GALERA */}
             <div
               className="col-span-2"
               style={{
-                background: isUserCraque
-                  ? 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(255,215,0,0.05))'
+                background: isTopVoted
+                  ? 'linear-gradient(135deg, rgba(255,69,0,0.18), rgba(255,140,0,0.08))'
+                  : hasVotedThisMember
+                  ? 'linear-gradient(135deg, rgba(255,140,0,0.15), rgba(201,168,76,0.05))'
                   : 'rgba(255,255,255,0.03)',
-                border: isUserCraque
-                  ? '1px solid rgba(255,215,0,0.45)'
+                border: isTopVoted
+                  ? '1px solid rgba(255,100,0,0.5)'
+                  : hasVotedThisMember
+                  ? '1px solid rgba(255,140,0,0.45)'
                   : '1px solid rgba(255,255,255,0.06)',
                 borderRadius: '4px',
                 padding: '12px 14px',
@@ -338,37 +359,38 @@ export function MemberModal({
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: 10,
-                    color: isUserCraque ? '#ffd700' : '#4a4a4a',
+                    color: isTopVoted || hasVotedThisMember ? '#ff9900' : '#4a4a4a',
                     letterSpacing: '0.08em',
                     marginBottom: 3,
                   }}
                 >
-                  CRAQUE DA GALERA
+                  FRANCÊS DA GALERA
                 </div>
                 <div style={{ fontSize: 13, color: '#f5f5f5', fontWeight: 600 }}>
-                  <span style={{ color: '#ffd700', marginRight: 4 }}>★</span>
-                  {member.respect_count || 0} {member.respect_count === 1 ? 'voto recebido' : 'votos recebidos'}
+                  <span style={{ color: '#ff7700', marginRight: 4 }}>🔥</span>
+                  {member.respect_count || 0}{' '}
+                  {member.respect_count === 1 ? 'voto recebido' : 'votos recebidos'}
                 </div>
               </div>
 
-              {isUserCraque ? (
+              {hasVotedThisMember ? (
                 <div
                   style={{
                     padding: '5px 12px',
                     borderRadius: '4px',
-                    background: 'rgba(255,215,0,0.15)',
-                    border: '1px solid rgba(255,215,0,0.5)',
-                    boxShadow: '0 0 10px rgba(255,215,0,0.2)',
-                    color: '#ffd700',
+                    background: 'rgba(255,140,0,0.15)',
+                    border: '1px solid rgba(255,140,0,0.5)',
+                    boxShadow: '0 0 10px rgba(255,140,0,0.2)',
+                    color: '#ffaa00',
                     fontSize: 11,
                     fontWeight: 700,
                     fontFamily: 'var(--font-mono)',
                     letterSpacing: '0.05em',
                   }}
                 >
-                  ★ SEU CRAQUE DE HOJE
+                  🔥 SEU VOTO COMPUTADO
                 </div>
-              ) : canVoteToday ? (
+              ) : canVoteMore ? (
                 <button
                   type="button"
                   disabled={isVoting}
@@ -376,9 +398,9 @@ export function MemberModal({
                   style={{
                     padding: '6px 14px',
                     borderRadius: '4px',
-                    background: 'rgba(201,168,76,0.15)',
-                    border: '1px solid rgba(201,168,76,0.5)',
-                    color: '#ffd700',
+                    background: 'rgba(255,69,0,0.18)',
+                    border: '1px solid rgba(255,140,0,0.6)',
+                    color: '#ffaa00',
                     fontSize: 11,
                     fontWeight: 700,
                     fontFamily: 'var(--font-mono)',
@@ -387,15 +409,17 @@ export function MemberModal({
                     transition: 'all 0.2s',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(201,168,76,0.3)'
+                    e.currentTarget.style.background = 'rgba(255,69,0,0.3)'
                     e.currentTarget.style.transform = 'scale(1.03)'
+                    e.currentTarget.style.boxShadow = '0 0 12px rgba(255,69,0,0.4)'
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(201,168,76,0.15)'
+                    e.currentTarget.style.background = 'rgba(255,69,0,0.18)'
                     e.currentTarget.style.transform = 'scale(1)'
+                    e.currentTarget.style.boxShadow = 'none'
                   }}
                 >
-                  {isVoting ? 'VOTANDO...' : '☆ VOTAR NO CRAQUE'}
+                  {isVoting ? 'VOTANDO...' : `🔥 VOTAR NO FRANCÊS (${votesRemaining} de 5)`}
                 </button>
               ) : (
                 <span
@@ -405,7 +429,7 @@ export function MemberModal({
                     fontFamily: 'var(--font-mono)',
                   }}
                 >
-                  Voto diário utilizado
+                  Limite de 5 votos diários atingido
                 </span>
               )}
             </div>

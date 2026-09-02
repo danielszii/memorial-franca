@@ -6,8 +6,10 @@ import { RankBadge, VersionBadge } from '../common/Badges'
 interface MemberCardProps {
   member: Member
   onClick?: () => void
-  canVoteToday?: boolean
-  hasVotedMemberId?: number | null
+  isTopVoted?: boolean
+  hasVotedThisMember?: boolean
+  canVoteMore?: boolean
+  votesRemaining?: number
   isVoting?: boolean
   onVote?: (memberId: number) => Promise<void>
 }
@@ -15,8 +17,10 @@ interface MemberCardProps {
 export function MemberCard({
   member,
   onClick,
-  canVoteToday = true,
-  hasVotedMemberId = null,
+  isTopVoted = false,
+  hasVotedThisMember = false,
+  canVoteMore = true,
+  votesRemaining = 5,
   isVoting = false,
   onVote,
 }: MemberCardProps) {
@@ -30,7 +34,6 @@ export function MemberCard({
 
   const isLegend = member.id === 1 || member.id === 8
   const displayNick = member.id === 1 ? 'Connor' : member.nick
-  const isUserCraque = hasVotedMemberId === member.id
 
   const hasStream = !!(member.twitch || member.kick || member.youtube)
   const defaultStreamUrl =
@@ -52,10 +55,13 @@ export function MemberCard({
   return (
     <div
       onClick={onClick}
+      className={isTopVoted ? 'flame-card-effect' : ''}
       style={{
         background: '#0f0f0f',
-        border: isUserCraque
-          ? '1px solid rgba(255,215,0,0.45)'
+        border: isTopVoted
+          ? '1px solid rgba(255,100,0,0.7)'
+          : hasVotedThisMember
+          ? '1px solid rgba(255,140,0,0.45)'
           : '1px solid rgba(255,255,255,0.07)',
         borderRadius: '6px',
         padding: '20px',
@@ -66,35 +72,39 @@ export function MemberCard({
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.borderColor = isUserCraque
-          ? 'rgba(255,215,0,0.7)'
-          : isLegend
-          ? 'rgba(201,168,76,0.3)'
-          : `${rc}30`
-        e.currentTarget.style.boxShadow = isUserCraque
-          ? '0 8px 24px rgba(0,0,0,0.6), 0 0 12px rgba(255,215,0,0.2)'
-          : isLegend
-          ? '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
-          : `0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
+        if (!isTopVoted) {
+          e.currentTarget.style.borderColor = hasVotedThisMember
+            ? 'rgba(255,140,0,0.7)'
+            : isLegend
+            ? 'rgba(201,168,76,0.3)'
+            : `${rc}30`
+          e.currentTarget.style.boxShadow = hasVotedThisMember
+            ? '0 8px 24px rgba(0,0,0,0.6), 0 0 12px rgba(255,140,0,0.2)'
+            : isLegend
+            ? '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
+            : `0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
+        }
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.borderColor = isUserCraque
-          ? 'rgba(255,215,0,0.45)'
-          : 'rgba(255,255,255,0.07)'
-        e.currentTarget.style.boxShadow = 'none'
+        if (!isTopVoted) {
+          e.currentTarget.style.borderColor = hasVotedThisMember
+            ? 'rgba(255,140,0,0.45)'
+            : 'rgba(255,255,255,0.07)'
+          e.currentTarget.style.boxShadow = 'none'
+        }
       }}
     >
-      {isUserCraque ? (
+      {/* ── Top Bar (Flamejante se for o mais votado) ── */}
+      {isTopVoted ? (
         <div
+          className="flame-banner-effect"
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            height: 2,
-            background: 'linear-gradient(90deg, #ffd700, #ffae00, transparent)',
-            boxShadow: '0 0 8px rgba(255,215,0,0.6)',
+            height: 3,
           }}
         />
       ) : isLegend ? (
@@ -122,6 +132,35 @@ export function MemberCard({
         />
       )}
 
+      {/* ── Badge de Destaque para o Mais Votado ── */}
+      {isTopVoted && (
+        <div
+          title="Integrante com mais votos no Francês da Galera!"
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 3,
+            padding: '2px 7px',
+            borderRadius: '4px',
+            background: 'linear-gradient(135deg, rgba(255,69,0,0.25), rgba(255,140,0,0.15))',
+            border: '1px solid rgba(255,100,0,0.6)',
+            boxShadow: '0 0 10px rgba(255,69,0,0.35)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 9,
+            fontWeight: 800,
+            color: '#ff9900',
+            letterSpacing: '0.06em',
+            userSelect: 'none',
+          }}
+        >
+          <span>🔥</span>
+          <span className="flame-text-gradient">MAIS VOTADO</span>
+        </div>
+      )}
+
       <div className="flex items-start gap-3 mb-3">
         <div
           style={{
@@ -129,18 +168,21 @@ export function MemberCard({
             height: 44,
             flexShrink: 0,
             borderRadius: '4px',
-            border: isUserCraque
-              ? '1.5px solid rgba(255,215,0,0.7)'
+            border: isTopVoted
+              ? '1.5px solid rgba(255,100,0,0.8)'
+              : hasVotedThisMember
+              ? '1.5px solid rgba(255,140,0,0.7)'
               : isLegend
               ? '1.5px solid rgba(201,168,76,0.5)'
               : `1.5px solid ${rc}40`,
             overflow: 'hidden',
             background: '#0a0a0a',
+            boxShadow: isTopVoted ? '0 0 10px rgba(255,69,0,0.4)' : 'none',
           }}
         >
           <img src={member.avatar} alt={member.nick} className="w-full h-full object-cover" />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-12">
           <div className="flex items-center gap-1.5 mb-1 min-w-0 w-full">
             {hasStream &&
               (member.is_live ? (
@@ -181,7 +223,7 @@ export function MemberCard({
                 fontWeight: 700,
                 fontSize: 16,
                 letterSpacing: '0.06em',
-                color: isUserCraque ? '#ffd700' : '#f5f5f5',
+                color: isTopVoted ? '#ffaa00' : hasVotedThisMember ? '#ff9900' : '#f5f5f5',
                 textTransform: 'uppercase',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -229,7 +271,7 @@ export function MemberCard({
 
       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 12 }} />
 
-      {/* ── Rodapé do Card: Versões + Botão Craque da Galera ── */}
+      {/* ── Rodapé do Card: Versões + Botão Francês da Galera ── */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1">
           {member.versions?.map(v => (
@@ -237,32 +279,32 @@ export function MemberCard({
           ))}
         </div>
 
-        {/* Botão / Badge Craque da Galera */}
-        {isUserCraque ? (
+        {/* Botão / Badge Francês da Galera */}
+        {hasVotedThisMember ? (
           <div
-            title="Você votou neste integrante como seu Craque da Galera hoje!"
+            title="Você votou neste integrante no Francês da Galera hoje!"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 4,
               padding: '3px 8px',
               borderRadius: '4px',
-              background: 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(255,215,0,0.1))',
-              border: '1px solid rgba(255,215,0,0.5)',
-              boxShadow: '0 0 10px rgba(255,215,0,0.25)',
+              background: 'linear-gradient(135deg, rgba(255,69,0,0.2), rgba(255,140,0,0.1))',
+              border: '1px solid rgba(255,140,0,0.6)',
+              boxShadow: '0 0 10px rgba(255,100,0,0.25)',
               fontFamily: 'var(--font-mono)',
               fontSize: 10,
               fontWeight: 700,
-              color: '#ffd700',
+              color: '#ff9900',
               letterSpacing: '0.04em',
               userSelect: 'none',
               flexShrink: 0,
             }}
           >
-            <span>★ SEU CRAQUE</span>
+            <span>🔥 SEU VOTO</span>
             <span style={{ color: '#fff', opacity: 0.9 }}>({member.respect_count || 0})</span>
           </div>
-        ) : canVoteToday ? (
+        ) : canVoteMore ? (
           <button
             type="button"
             disabled={isVoting}
@@ -270,7 +312,7 @@ export function MemberCard({
               e.stopPropagation()
               onVote?.(member.id)
             }}
-            title="Clique para votar no Craque da Galera hoje"
+            title={`Votar no Francês da Galera (${votesRemaining} de 5 votos restantes hoje)`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -289,24 +331,26 @@ export function MemberCard({
               flexShrink: 0,
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(201,168,76,0.15)'
-              e.currentTarget.style.borderColor = 'rgba(201,168,76,0.5)'
-              e.currentTarget.style.color = '#ffd700'
+              e.currentTarget.style.background = 'rgba(255,69,0,0.18)'
+              e.currentTarget.style.borderColor = 'rgba(255,140,0,0.6)'
+              e.currentTarget.style.color = '#ff9900'
               e.currentTarget.style.transform = 'scale(1.03)'
+              e.currentTarget.style.boxShadow = '0 0 10px rgba(255,69,0,0.3)'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
               e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
               e.currentTarget.style.color = '#b0b0b0'
               e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            <span>☆ VOTAR</span>
+            <span>🔥 VOTAR</span>
             <span style={{ color: '#777' }}>({member.respect_count || 0})</span>
           </button>
         ) : (
           <div
-            title="Total de votos no Craque da Galera"
+            title="Total de votos no Francês da Galera"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -317,13 +361,13 @@ export function MemberCard({
               border: '1px solid rgba(255,255,255,0.06)',
               fontFamily: 'var(--font-mono)',
               fontSize: 10,
-              color: '#555',
+              color: '#666',
               letterSpacing: '0.04em',
               userSelect: 'none',
               flexShrink: 0,
             }}
           >
-            <span>☆ CRAQUE</span>
+            <span>🔥</span>
             <span>({member.respect_count || 0})</span>
           </div>
         )}

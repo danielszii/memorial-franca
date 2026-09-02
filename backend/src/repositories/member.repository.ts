@@ -69,27 +69,43 @@ export class MemberRepository {
     return rows[0] || null
   }
 
-  async voteRespect(memberId: number, voteHash: string): Promise<number> {
+  async voteRespect(
+    memberId: number,
+    userHash: string,
+    voteHash: string
+  ): Promise<{ newRespectCount: number; remainingVotes: number }> {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
 
-      // 1. Tenta registrar o voto na tabela daily_votes
+      // 1. Verifica quantos votos o usuário já realizou hoje (limite de 5 votos)
+      const countRes = await client.query<{ count: string }>(
+        'SELECT COUNT(*) AS count FROM daily_votes WHERE user_hash = $1;',
+        [userHash]
+      )
+      const currentVotesCount = Number(countRes.rows[0]?.count || 0)
+
+      if (currentVotesCount >= 5) {
+        await client.query('ROLLBACK')
+        throw new AppError('Você já utilizou seus 5 votos no Francês da Galera hoje! Volte amanhã.', 429)
+      }
+
+      // 2. Tenta registrar o voto (vote_hash é único por membro por dia)
       try {
         await client.query(
-          'INSERT INTO daily_votes (vote_hash, member_id) VALUES ($1, $2);',
-          [voteHash, memberId]
+          'INSERT INTO daily_votes (user_hash, vote_hash, member_id) VALUES ($1, $2, $3);',
+          [userHash, voteHash, memberId]
         )
       } catch (err: any) {
         if (err.code === '23505') {
-          // Violação de chave única: já votou hoje com este hash
+          // Violação de chave única: já votou neste membro hoje
           await client.query('ROLLBACK')
-          throw new AppError('Você já votou no seu Craque da Galera hoje! Volte amanhã.', 429)
+          throw new AppError('Você já votou neste integrante hoje! Escolha outro membro da França.', 429)
         }
         throw err
       }
 
-      // 2. Incrementa o contador de respeito do membro
+      // 3. Incrementa o contador de respeito do membro
       const updateResult = await client.query<{ respect_count: number }>(
         `UPDATE members 
          SET respect_count = COALESCE(respect_count, 0) + 1 
@@ -104,7 +120,10 @@ export class MemberRepository {
       }
 
       await client.query('COMMIT')
-      return updateResult.rows[0].respect_count
+      return {
+        newRespectCount: updateResult.rows[0].respect_count,
+        remainingVotes: Math.max(0, 5 - (currentVotesCount + 1)),
+      }
     } catch (error) {
       await client.query('ROLLBACK')
       throw error

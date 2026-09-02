@@ -22,21 +22,30 @@ export class MemberService {
     return member
   }
 
-  async voteRespect(memberId: number, ip: string): Promise<{ success: boolean; newRespectCount: number }> {
+  async voteRespect(
+    memberId: number,
+    ip: string
+  ): Promise<{ success: boolean; newRespectCount: number; remainingVotes: number }> {
     // 1. Gera a data atual no formato YYYY-MM-DD
     const today = new Date().toISOString().slice(0, 10)
-
-    // 2. Cria o hash anônimo SHA-256 (IP + "::" + Data)
-    // Isso garante anonimato (não salva IP no banco) e controle estrito de 1 voto/dia
     const cleanIp = (ip || '127.0.0.1').trim()
-    const voteHash = crypto.createHash('sha256').update(`${cleanIp}::${today}`).digest('hex')
 
-    // 3. Executa o voto no repositório com transação atômica
-    const newRespectCount = await this.memberRepository.voteRespect(memberId, voteHash)
+    // 2. Hash do torcedor no dia (para controle do limite de 5 votos/dia)
+    const userHash = crypto.createHash('sha256').update(`${cleanIp}::${today}`).digest('hex')
+
+    // 3. Hash específico do voto no membro (para impedir 2 votos no mesmo membro/dia)
+    const voteHash = crypto
+      .createHash('sha256')
+      .update(`${cleanIp}::${memberId}::${today}`)
+      .digest('hex')
+
+    // 4. Executa o voto no repositório com transação atômica
+    const result = await this.memberRepository.voteRespect(memberId, userHash, voteHash)
 
     return {
       success: true,
-      newRespectCount,
+      newRespectCount: result.newRespectCount,
+      remainingVotes: result.remainingVotes,
     }
   }
 }

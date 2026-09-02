@@ -88,3 +88,43 @@ body {
 .live-indicator-dot-green {
   animation: live-pulse-green 1.8s infinite ease-in-out;
 }
+
+/* ── Efeito Flamejante para o Mais Votado do Francês da Galera ── */
+@keyframes flame-glow {
+  0% {
+    box-shadow: 0 0 16px rgba(255, 69, 0, 0.45), 0 0 32px rgba(255, 140, 0, 0.25), inset 0 0 10px rgba(255, 69, 0, 0.15);
+    border-color: rgba(255, 90, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 26px rgba(255, 69, 0, 0.75), 0 0 50px rgba(255, 165, 0, 0.45), inset 0 0 16px rgba(255, 100, 0, 0.3);
+    border-color: rgba(255, 160, 0, 0.95);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(255, 69, 0, 0.45), 0 0 32px rgba(255, 140, 0, 0.25), inset 0 0 10px rgba(255, 69, 0, 0.15);
+    border-color: rgba(255, 90, 0, 0.6);
+  }
+}
+
+@keyframes flame-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.flame-card-effect {
+  animation: flame-glow 2.4s infinite ease-in-out !important;
+}
+
+.flame-banner-effect {
+  background: linear-gradient(90deg, #ff2200, #ff7700, #ffd000, #ff4500) !important;
+  background-size: 300% 300% !important;
+  animation: flame-gradient 2.8s ease infinite !important;
+  box-shadow: 0 0 12px rgba(255, 100, 0, 0.8) !important;
+}
+
+.flame-text-gradient {
+  background: linear-gradient(135deg, #ff4500 0%, #ff8c00 50%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+

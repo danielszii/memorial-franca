@@ -36,7 +36,8 @@ export default function App() {
     return HERO_IMAGES[randomIndex];
   });
 
-  const { canVoteToday, hasVotedMemberId, isVoting, castVote } = useVoteControl()
+  const { votedMemberIds, votesRemaining, canVoteMore, isVoting, hasVotedInMember, castVote } =
+    useVoteControl()
 
   const handleVote = async (memberId: number) => {
     const result = await castVote(memberId)
@@ -53,6 +54,8 @@ export default function App() {
       alert(result.message)
     }
   }
+
+  const maxRespectCount = members.reduce((max, m) => Math.max(max, m.respect_count || 0), 0)
 
   useEffect(() => {
     async function fetchData() {
@@ -640,17 +643,24 @@ export default function App() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {paginated.map(member => (
-                <MemberCard
-                  key={member.id}
-                  member={member}
-                  onClick={() => setSelectedMember(member)}
-                  canVoteToday={canVoteToday}
-                  hasVotedMemberId={hasVotedMemberId}
-                  isVoting={isVoting}
-                  onVote={handleVote}
-                />
-              ))}
+              {paginated.map(member => {
+                const isTopVoted =
+                  maxRespectCount > 0 && (member.respect_count || 0) === maxRespectCount
+                const hasVotedThisMember = hasVotedInMember(member.id)
+                return (
+                  <MemberCard
+                    key={member.id}
+                    member={member}
+                    onClick={() => setSelectedMember(member)}
+                    isTopVoted={isTopVoted}
+                    hasVotedThisMember={hasVotedThisMember}
+                    canVoteMore={canVoteMore}
+                    votesRemaining={votesRemaining}
+                    isVoting={isVoting}
+                    onVote={handleVote}
+                  />
+                )
+              })}
             </div>
           )}
 
@@ -945,8 +955,12 @@ export default function App() {
         <MemberModal
           member={selectedMember}
           onClose={() => setSelectedMember(null)}
-          canVoteToday={canVoteToday}
-          hasVotedMemberId={hasVotedMemberId}
+          isTopVoted={
+            maxRespectCount > 0 && (selectedMember.respect_count || 0) === maxRespectCount
+          }
+          hasVotedThisMember={hasVotedInMember(selectedMember.id)}
+          canVoteMore={canVoteMore}
+          votesRemaining={votesRemaining}
           isVoting={isVoting}
           onVote={handleVote}
         />
