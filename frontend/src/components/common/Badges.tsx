@@ -113,62 +113,58 @@ export function FlameFilledIcon({
   )
 }
 
-export function CardEraTimeline({ versions = [] }: { versions?: string[] }) {
-  const allVersions = ['1.0', '2.0', '3.0', '4.0', '5.0', '6.0']
+export function MovingFlamesCrest() {
   return (
-    <div className="w-full pt-1">
-      <div className="flex items-center gap-0 w-full">
-        {allVersions.map((v, i) => {
-          const active = versions.includes(v)
-          const c = versionColors[v] || '#ffffff'
-          return (
-            <div key={v} className="flex items-center flex-1">
-              <div
-                style={{
-                  width: '100%',
-                  height: 3,
-                  background: active
-                    ? `linear-gradient(90deg, ${c}90, ${c}50)`
-                    : 'rgba(255,255,255,0.06)',
-                  borderRadius: i === 0 ? '2px 0 0 2px' : i === 5 ? '0 2px 2px 0' : 0,
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 7,
-                    height: 7,
-                    borderRadius: '50%',
-                    background: active ? c : '#1c1c1c',
-                    border: `1px solid ${active ? c : '#333'}`,
-                    boxShadow: active ? `0 0 6px ${c}` : 'none',
-                  }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      <div className="flex mt-1">
-        {allVersions.map(v => (
-          <div
-            key={v}
-            className="flex-1 text-center"
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9,
-              fontWeight: versions.includes(v) ? 600 : 400,
-              color: versions.includes(v) ? versionColors[v] : '#383838',
-            }}
-          >
-            {v}
-          </div>
-        ))}
-      </div>
+    <div
+      style={{
+        position: 'absolute',
+        top: -14,
+        left: -2,
+        right: -2,
+        height: 20,
+        overflow: 'visible',
+        pointerEvents: 'none',
+        zIndex: 10,
+      }}
+    >
+      <svg
+        viewBox="0 0 300 28"
+        preserveAspectRatio="none"
+        style={{ width: '100%', height: '100%', overflow: 'visible' }}
+      >
+        <defs>
+          <linearGradient id="flameGradRed" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#cc1100" stopOpacity="0.85" />
+            <stop offset="60%" stopColor="#ff4500" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#ff7700" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="flameGradOrange" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#ff3300" stopOpacity="0.9" />
+            <stop offset="55%" stopColor="#ff8800" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#ffbb00" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="flameGradGold" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#ff7700" stopOpacity="0.95" />
+            <stop offset="50%" stopColor="#ffcc00" stopOpacity="1" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.85" />
+          </linearGradient>
+        </defs>
+
+        {/* Camada Traseira de Fogo (Chamas Vermelhas) */}
+        <g className="flame-tongue-item-1" fill="url(#flameGradRed)">
+          <path d="M 0 28 Q 12 4 22 10 Q 36 -4 50 14 Q 65 0 80 12 Q 98 -6 118 14 Q 138 -2 158 16 Q 178 -6 198 10 Q 218 1 238 14 Q 258 -4 278 8 Q 290 16 300 28 Z" />
+        </g>
+
+        {/* Camada Intermediária de Fogo (Chamas Laranja Vibrantes) */}
+        <g className="flame-tongue-item-2" fill="url(#flameGradOrange)">
+          <path d="M 0 28 Q 16 8 30 16 Q 48 0 66 16 Q 88 -2 108 14 Q 128 3 148 16 Q 168 -3 188 13 Q 208 4 228 16 Q 248 -1 268 12 Q 285 6 300 28 Z" />
+        </g>
+
+        {/* Camada Frontal de Fogo (Chamas Douradas Incandescentes) */}
+        <g className="flame-tongue-item-3" fill="url(#flameGradGold)">
+          <path d="M 0 28 Q 20 13 38 20 Q 58 6 78 20 Q 98 4 118 18 Q 138 8 158 20 Q 178 3 198 18 Q 218 10 238 20 Q 258 7 278 16 Q 290 12 300 28 Z" />
+        </g>
+      </svg>
     </div>
   )
 }
