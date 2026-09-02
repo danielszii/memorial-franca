@@ -254,23 +254,6 @@ export function MemberCard({
                 }
               />
             )}
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                fontWeight: 700,
-                color: hasVotedThisMember
-                  ? '#ff4500'
-                  : isBtnHovered && canVoteMore
-                  ? '#ff5500'
-                  : canVoteMore
-                  ? '#999999'
-                  : '#444444',
-                transition: 'color 0.15s ease',
-              }}
-            >
-              {member.respect_count || 0}
-            </span>
           </button>
 
           {/* Tooltip ao passar o mouse: "VOTAR" */}
