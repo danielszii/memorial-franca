@@ -5,6 +5,7 @@ import https from 'https'
 import routes from './routes/routes'
 import { errorHandler } from './middlewares/error.middleware'
 import { LiveSyncService } from './services/live-sync.service'
+import { initDatabase } from './config/database-init'
 
 dotenv.config()
 
@@ -25,16 +26,16 @@ app.use((_req, res, next) => {
 
 app.use(express.json())
 
-// CORS configurado apenas para métodos de leitura seguros (GET, HEAD)
+// CORS configurado para GET, POST e HEAD
 app.use(
   cors({
     origin: '*',
-    methods: ['GET', 'HEAD'],
+    methods: ['GET', 'POST', 'HEAD'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 )
 
-// Rotas da API (Apenas rotas GET seguras de leitura)
+// Rotas da API
 app.use('/franca', routes)
 
 // Middleware Global de Tratamento de Erros (sempre por último)
@@ -71,8 +72,9 @@ function startSelfPing() {
   }, INTERVAL)
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`)
+  await initDatabase()
   startSelfPing()
   // Inicia o sincronizador automático de lives (a cada 2 minutos)
   LiveSyncService.startScheduler()

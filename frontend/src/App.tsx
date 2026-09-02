@@ -12,6 +12,7 @@ import { HonorsSection } from './components/layout/HonorsSection'
 import { GallerySection } from './components/layout/GallerySection'
 import { DevDonationModal } from './components/common/DevDonationModal'
 import { OnlineWidget } from './components/common/OnlineWidget'
+import { useVoteControl } from './hooks/useVoteControl'
 
 const HERO_IMAGES = [
   heroBg1,
@@ -35,9 +36,27 @@ export default function App() {
     return HERO_IMAGES[randomIndex];
   });
 
+  const { canVoteToday, hasVotedMemberId, isVoting, castVote } = useVoteControl()
+
+  const handleVote = async (memberId: number) => {
+    const result = await castVote(memberId)
+    if (result.success && typeof result.newRespectCount === 'number') {
+      setMembers(prev =>
+        prev.map(m => (m.id === memberId ? { ...m, respect_count: result.newRespectCount } : m))
+      )
+      if (selectedMember && selectedMember.id === memberId) {
+        setSelectedMember(prev =>
+          prev ? { ...prev, respect_count: result.newRespectCount } : null
+        )
+      }
+    } else if (!result.success && result.message) {
+      alert(result.message)
+    }
+  }
+
   useEffect(() => {
     async function fetchData() {
-      const API_URL = 'https://memorial-franca.onrender.com'
+      const API_URL = import.meta.env.VITE_API_URL || 'https://memorial-franca.onrender.com'
       try {
         const [resEras, resMembers] = await Promise.all([
           axios.get(`${API_URL}/franca/eras`),
@@ -626,6 +645,10 @@ export default function App() {
                   key={member.id}
                   member={member}
                   onClick={() => setSelectedMember(member)}
+                  canVoteToday={canVoteToday}
+                  hasVotedMemberId={hasVotedMemberId}
+                  isVoting={isVoting}
+                  onVote={handleVote}
                 />
               ))}
             </div>
@@ -919,7 +942,14 @@ export default function App() {
 
       {/* ── Member Modal ── */}
       {selectedMember && (
-        <MemberModal member={selectedMember} onClose={() => setSelectedMember(null)} />
+        <MemberModal
+          member={selectedMember}
+          onClose={() => setSelectedMember(null)}
+          canVoteToday={canVoteToday}
+          hasVotedMemberId={hasVotedMemberId}
+          isVoting={isVoting}
+          onVote={handleVote}
+        />
       )}
     </div>
   )

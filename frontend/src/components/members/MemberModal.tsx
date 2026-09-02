@@ -40,14 +40,28 @@ const Icons = {
   ),
 }
 
-export function MemberModal({ member, onClose }: { member: Member; onClose: () => void }) {
+export function MemberModal({
+  member,
+  onClose,
+  canVoteToday = true,
+  hasVotedMemberId = null,
+  isVoting = false,
+  onVote,
+}: {
+  member: Member
+  onClose: () => void
+  canVoteToday?: boolean
+  hasVotedMemberId?: number | null
+  isVoting?: boolean
+  onVote?: (memberId: number) => Promise<void>
+}) {
   const rawRanks = Array.isArray(member.rank) ? member.rank : [member.rank]
   const ranks = rawRanks.filter(Boolean)
-  console.log("DADOS DO MEMBRO CLICADO:", member);
 
   const primaryRank = (ranks[0] || 'Membro') as Rank
   const rc = (rankColor as Record<string, string>)[primaryRank] || '#4a5568'
   const isLegend = member.id === 1 || member.id === 8
+  const isUserCraque = hasVotedMemberId === member.id
 
   // Busca campos em todos os padrões possíveis
   const m = member as any
@@ -299,6 +313,101 @@ export function MemberModal({ member, onClose }: { member: Member; onClose: () =
               <div style={{ fontSize: 13, color: '#d4d4d4', fontWeight: 500 }}>
                 {member.versions?.length || 0} versões
               </div>
+            </div>
+
+            {/* 5. CRAQUE DA GALERA */}
+            <div
+              className="col-span-2"
+              style={{
+                background: isUserCraque
+                  ? 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(255,215,0,0.05))'
+                  : 'rgba(255,255,255,0.03)',
+                border: isUserCraque
+                  ? '1px solid rgba(255,215,0,0.45)'
+                  : '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                padding: '12px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 10,
+                    color: isUserCraque ? '#ffd700' : '#4a4a4a',
+                    letterSpacing: '0.08em',
+                    marginBottom: 3,
+                  }}
+                >
+                  CRAQUE DA GALERA
+                </div>
+                <div style={{ fontSize: 13, color: '#f5f5f5', fontWeight: 600 }}>
+                  <span style={{ color: '#ffd700', marginRight: 4 }}>★</span>
+                  {member.respect_count || 0} {member.respect_count === 1 ? 'voto recebido' : 'votos recebidos'}
+                </div>
+              </div>
+
+              {isUserCraque ? (
+                <div
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '4px',
+                    background: 'rgba(255,215,0,0.15)',
+                    border: '1px solid rgba(255,215,0,0.5)',
+                    boxShadow: '0 0 10px rgba(255,215,0,0.2)',
+                    color: '#ffd700',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  ★ SEU CRAQUE DE HOJE
+                </div>
+              ) : canVoteToday ? (
+                <button
+                  type="button"
+                  disabled={isVoting}
+                  onClick={() => onVote?.(member.id)}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '4px',
+                    background: 'rgba(201,168,76,0.15)',
+                    border: '1px solid rgba(201,168,76,0.5)',
+                    color: '#ffd700',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    fontFamily: 'var(--font-mono)',
+                    letterSpacing: '0.05em',
+                    cursor: isVoting ? 'wait' : 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(201,168,76,0.3)'
+                    e.currentTarget.style.transform = 'scale(1.03)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(201,168,76,0.15)'
+                    e.currentTarget.style.transform = 'scale(1)'
+                  }}
+                >
+                  {isVoting ? 'VOTANDO...' : '☆ VOTAR NO CRAQUE'}
+                </button>
+              ) : (
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: '#555',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  Voto diário utilizado
+                </span>
+              )}
             </div>
           </div>
 

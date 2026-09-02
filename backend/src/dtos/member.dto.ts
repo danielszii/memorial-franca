@@ -19,4 +19,5 @@ export interface MemberResponseDTO {
   kick?: string
   is_live?: boolean
   live_url?: string
+  respect_count?: number
 }

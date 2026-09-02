@@ -28,6 +28,7 @@ export interface Member {
   kick?: string
   is_live?: boolean
   live_url?: string
+  respect_count?: number
 }
 
 export interface Era {

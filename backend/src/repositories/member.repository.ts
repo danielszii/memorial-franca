@@ -1,5 +1,6 @@
 import pool from '../config/database'
 import { MemberResponseDTO } from '../dtos/member.dto'
+import { AppError } from '../errors/app.error'
 
 export class MemberRepository {
   async findAll(): Promise<MemberResponseDTO[]> {
@@ -21,6 +22,7 @@ export class MemberRepository {
         m.kick,
         m.is_live,
         m.live_url,
+        COALESCE(m.respect_count, 0) AS respect_count,
         COALESCE(
           ARRAY_AGG(mv.era_version ORDER BY mv.era_version ASC) FILTER (WHERE mv.era_version IS NOT NULL),
           ARRAY[]::VARCHAR[]
@@ -35,7 +37,6 @@ export class MemberRepository {
   }
 
   async findById(id: number): Promise<MemberResponseDTO | null> {
-    // Parâmetro $1 isola o ID de qualquer injeção
     const query = `
       SELECT 
         m.id,
@@ -54,6 +55,7 @@ export class MemberRepository {
         m.kick,
         m.is_live,
         m.live_url,
+        COALESCE(m.respect_count, 0) AS respect_count,
         COALESCE(
           ARRAY_AGG(mv.era_version ORDER BY mv.era_version ASC) FILTER (WHERE mv.era_version IS NOT NULL),
           ARRAY[]::VARCHAR[]
@@ -65,5 +67,49 @@ export class MemberRepository {
     `
     const { rows } = await pool.query(query, [id])
     return rows[0] || null
+  }
+
+  async voteRespect(memberId: number, voteHash: string): Promise<number> {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+
+      // 1. Tenta registrar o voto na tabela daily_votes
+      try {
+        await client.query(
+          'INSERT INTO daily_votes (vote_hash, member_id) VALUES ($1, $2);',
+          [voteHash, memberId]
+        )
+      } catch (err: any) {
+        if (err.code === '23505') {
+          // Violação de chave única: já votou hoje com este hash
+          await client.query('ROLLBACK')
+          throw new AppError('Você já votou no seu Craque da Galera hoje! Volte amanhã.', 429)
+        }
+        throw err
+      }
+
+      // 2. Incrementa o contador de respeito do membro
+      const updateResult = await client.query<{ respect_count: number }>(
+        `UPDATE members 
+         SET respect_count = COALESCE(respect_count, 0) + 1 
+         WHERE id = $1 
+         RETURNING respect_count;`,
+        [memberId]
+      )
+
+      if (updateResult.rows.length === 0) {
+        await client.query('ROLLBACK')
+        throw new AppError(`Membro com ID ${memberId} não encontrado.`, 404)
+      }
+
+      await client.query('COMMIT')
+      return updateResult.rows[0].respect_count
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
   }
 }

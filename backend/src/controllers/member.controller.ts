@@ -43,4 +43,36 @@ export class MemberController {
       next(error)
     }
   }
+
+  voteRespect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      const id = Number(rawId)
+
+      if (isNaN(id) || !rawId) {
+        throw new AppError('O parâmetro ID deve ser um número válido.', 400)
+      }
+
+      // Extrai o IP real considerando proxies (Cloudflare, Render, proxies reversos)
+      const cfIp = req.headers['cf-connecting-ip']
+      const xForwardedFor = req.headers['x-forwarded-for']
+      const xRealIp = req.headers['x-real-ip']
+
+      let clientIp = ''
+      if (typeof cfIp === 'string' && cfIp.trim()) {
+        clientIp = cfIp.trim()
+      } else if (typeof xForwardedFor === 'string' && xForwardedFor.trim()) {
+        clientIp = xForwardedFor.split(',')[0].trim()
+      } else if (typeof xRealIp === 'string' && xRealIp.trim()) {
+        clientIp = xRealIp.trim()
+      } else {
+        clientIp = req.socket.remoteAddress || '127.0.0.1'
+      }
+
+      const result = await this.memberService.voteRespect(id, clientIp)
+      res.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
 }
