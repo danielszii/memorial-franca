@@ -43,7 +43,6 @@ const Icons = {
 export function MemberModal({
   member,
   onClose,
-  isTopVoted = false,
   hasVotedThisMember = false,
   canVoteMore = true,
   votesRemaining = 5,
@@ -88,9 +87,7 @@ export function MemberModal({
         className="relative w-full max-w-lg"
         style={{
           background: '#111',
-          border: isTopVoted
-            ? '1px solid rgba(255,85,0,0.5)'
-            : isLegend
+          border: isLegend
             ? '1px solid rgba(201,168,76,0.25)'
             : `1px solid ${rc}30`,
           borderRadius: '8px',
@@ -101,15 +98,8 @@ export function MemberModal({
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* ── Barra Superior (Gradiente de Chamas no Mais Votado) ── */}
-        {isTopVoted ? (
-          <div
-            className="flame-banner-effect"
-            style={{
-              height: 2.5,
-            }}
-          />
-        ) : isLegend ? (
+        {/* ── Barra Superior Padrão ── */}
+        {isLegend ? (
           <div
             style={{
               height: 2,
@@ -128,9 +118,7 @@ export function MemberModal({
                 width: 72,
                 height: 72,
                 borderRadius: '6px',
-                border: isTopVoted
-                  ? '2px solid rgba(255,85,0,0.6)'
-                  : isLegend
+                border: isLegend
                   ? '2px solid rgba(201,168,76,0.6)'
                   : `2px solid ${rc}50`,
                 overflow: 'hidden',
@@ -178,21 +166,6 @@ export function MemberModal({
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     AO VIVO
                   </a>
-                )}
-                {isTopVoted && (
-                  <span
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold"
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 10,
-                      background: 'rgba(255,69,0,0.12)',
-                      border: '1px solid rgba(255,85,0,0.4)',
-                      color: '#ff6600',
-                    }}
-                  >
-                    <FlameFilledIcon size={11} color="#ff5500" />
-                    MAIS VOTADO
-                  </span>
                 )}
               </div>
               <div
@@ -335,16 +308,8 @@ export function MemberModal({
             <div
               className="col-span-2"
               style={{
-                background: isTopVoted
-                  ? 'linear-gradient(135deg, rgba(255,69,0,0.12), rgba(255,140,0,0.05))'
-                  : hasVotedThisMember
-                  ? 'linear-gradient(135deg, rgba(255,100,0,0.1), rgba(201,168,76,0.04))'
-                  : 'rgba(255,255,255,0.03)',
-                border: isTopVoted
-                  ? '1px solid rgba(255,85,0,0.4)'
-                  : hasVotedThisMember
-                  ? '1px solid rgba(255,100,0,0.35)'
-                  : '1px solid rgba(255,255,255,0.06)',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
                 borderRadius: '4px',
                 padding: '12px 14px',
                 display: 'flex',
@@ -358,7 +323,7 @@ export function MemberModal({
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: 10,
-                    color: isTopVoted || hasVotedThisMember ? '#ff8800' : '#4a4a4a',
+                    color: '#4a4a4a',
                     letterSpacing: '0.08em',
                     marginBottom: 3,
                   }}
@@ -366,7 +331,7 @@ export function MemberModal({
                   FRANCÊS DA GALERA
                 </div>
                 <div style={{ fontSize: 13, color: '#f5f5f5', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <FlameFilledIcon size={15} color="#ff5500" />
+                  <FlameFilledIcon size={15} color="#ff4500" />
                   <span>
                     {member.respect_count || 0}{' '}
                     {member.respect_count === 1 ? 'voto recebido' : 'votos recebidos'}
@@ -382,16 +347,16 @@ export function MemberModal({
                     gap: 6,
                     padding: '5px 12px',
                     borderRadius: '4px',
-                    background: 'rgba(255,69,0,0.12)',
-                    border: '1px solid rgba(255,85,0,0.4)',
-                    color: '#ff6600',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: '#8a8a8a',
                     fontSize: 11,
                     fontWeight: 700,
                     fontFamily: 'var(--font-mono)',
                     letterSpacing: '0.05em',
                   }}
                 >
-                  <FlameFilledIcon size={13} color="#ff5500" />
+                  <FlameFilledIcon size={13} color="#ff4500" />
                   <span>VOTADO</span>
                 </div>
               ) : canVoteMore ? (
@@ -405,9 +370,9 @@ export function MemberModal({
                     gap: 6,
                     padding: '6px 14px',
                     borderRadius: '4px',
-                    background: 'rgba(255,69,0,0.14)',
-                    border: '1px solid rgba(255,85,0,0.5)',
-                    color: '#ff8800',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#f5f5f5',
                     fontSize: 11,
                     fontWeight: 700,
                     fontFamily: 'var(--font-mono)',
@@ -416,15 +381,15 @@ export function MemberModal({
                     transition: 'all 0.15s ease-in-out',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(255,69,0,0.22)'
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.12)'
                     e.currentTarget.style.transform = 'scale(1.03)'
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(255,69,0,0.14)'
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
                     e.currentTarget.style.transform = 'scale(1)'
                   }}
                 >
-                  <FlameOutlineIcon size={14} color="#ff8800" />
+                  <FlameOutlineIcon size={14} color="#f5f5f5" />
                   <span>{isVoting ? 'VOTANDO...' : `VOTAR (${votesRemaining} de 5)`}</span>
                 </button>
               ) : (

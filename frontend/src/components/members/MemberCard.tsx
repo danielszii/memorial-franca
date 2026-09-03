@@ -58,9 +58,7 @@ export function MemberCard({
       onClick={onClick}
       style={{
         background: '#0f0f0f',
-        border: hasVotedThisMember
-          ? '1px solid rgba(255,100,0,0.35)'
-          : '1px solid rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.07)',
         borderRadius: '6px',
         padding: '18px',
         cursor: onClick ? 'pointer' : 'default',
@@ -70,22 +68,16 @@ export function MemberCard({
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.borderColor = hasVotedThisMember
-          ? 'rgba(255,100,0,0.6)'
-          : isLegend
+        e.currentTarget.style.borderColor = isLegend
           ? 'rgba(201,168,76,0.3)'
           : `${rc}30`
-        e.currentTarget.style.boxShadow = hasVotedThisMember
-          ? '0 6px 18px rgba(0,0,0,0.5)'
-          : isLegend
+        e.currentTarget.style.boxShadow = isLegend
           ? '0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)'
           : `0 6px 18px rgba(0,0,0,0.5), 0 0 0 1px ${rc}15`
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.borderColor = hasVotedThisMember
-          ? 'rgba(255,100,0,0.35)'
-          : 'rgba(255,255,255,0.07)'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
@@ -127,9 +119,7 @@ export function MemberCard({
               height: 44,
               flexShrink: 0,
               borderRadius: '4px',
-              border: hasVotedThisMember
-                ? '1.5px solid rgba(255,100,0,0.5)'
-                : isLegend
+              border: isLegend
                 ? '1.5px solid rgba(201,168,76,0.5)'
                 : `1.5px solid ${rc}40`,
               overflow: 'hidden',
@@ -207,7 +197,7 @@ export function MemberCard({
           </div>
         </div>
 
-        {/* Direita: Botão de Voto Alinhado com o Topo (Apenas o Fogo e Número, sem caixa quadrada) */}
+        {/* Direita: Botão de Voto Alinhado com o Topo (Apenas o Fogo, sem contorno laranja) */}
         <div className="relative flex items-center flex-shrink-0 pt-0.5">
           <button
             type="button"
@@ -230,14 +220,14 @@ export function MemberCard({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 5,
+              justifyContent: 'center',
               background: 'transparent',
               border: 'none',
               padding: '2px 4px',
               cursor: hasVotedThisMember || !canVoteMore ? 'default' : 'pointer',
               outline: 'none',
               transition: 'transform 0.15s ease',
-              transform: isBtnHovered && canVoteMore && !hasVotedThisMember ? 'scale(1.15)' : 'scale(1)',
+              transform: isBtnHovered && canVoteMore && !hasVotedThisMember ? 'scale(1.2)' : 'scale(1)',
             }}
           >
             {hasVotedThisMember ? (
@@ -264,14 +254,14 @@ export function MemberCard({
                 top: 26,
                 right: 0,
                 background: '#141414',
-                border: '1px solid rgba(255,85,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.15)',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.9)',
                 borderRadius: '4px',
                 padding: '2px 7px',
                 fontSize: 10,
                 fontFamily: 'var(--font-mono)',
                 fontWeight: 700,
-                color: '#ff6600',
+                color: '#ff5500',
                 letterSpacing: '0.05em',
                 pointerEvents: 'none',
                 whiteSpace: 'nowrap',
